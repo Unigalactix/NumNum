@@ -1,0 +1,18 @@
+{
+  "name": "For My Num Num",
+  "short_name": "Num Num",
+  "description": "A little world of love, made just for you.",
+  "start_url": "/NumNum/",
+  "scope": "/NumNum/",
+  "display": "standalone",
+  "background_color": "#ffe3ef",
+  "theme_color": "#ffd6e8",
+  "icons": [
+    {
+      "src": "/NumNum/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

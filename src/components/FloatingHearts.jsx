@@ -2,11 +2,15 @@ import { useMemo } from 'react'
 
 const EMOJIS = ['💗', '💕', '🌸', '✨', '💖', '🎀', '💘', '🩷']
 
+const prefersReducedMotion =
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
 // Soft floating hearts/petals drifting in the background
-export default function FloatingHearts({ count = 16 }) {
+export default function FloatingHearts({ count = 10 }) {
   const items = useMemo(
     () =>
-      Array.from({ length: count }).map((_, i) => ({
+      Array.from({ length: prefersReducedMotion ? 0 : count }).map((_, i) => ({
         id: i,
         left: Math.random() * 100,
         delay: Math.random() * 6,

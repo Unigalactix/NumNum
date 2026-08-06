@@ -2,13 +2,15 @@ import { motion } from 'framer-motion'
 import { content } from '../content'
 import { useStore, GAME_IDS } from '../store'
 import { useSound } from '../hooks/useSound'
+import TiltCard from './TiltCard'
+import { tap } from '../lib/motion'
 
 const GAMES = [
-  { id: 'memory', emoji: '🃏', title: 'Memory of Us', desc: 'Match every pair' },
-  { id: 'quiz', emoji: '💭', title: 'How Well You Know Us', desc: 'A little quiz' },
-  { id: 'scratch', emoji: '✨', title: 'A Secret For You', desc: 'Scratch to reveal' },
-  { id: 'puzzle', emoji: '🧩', title: 'Piece Us Together', desc: 'Solve the picture' },
-  { id: 'lovemeter', emoji: '💗', title: 'The Love Meter', desc: 'How much? find out' },
+  { id: 'memory', emoji: '🃏', title: 'Memory of Us', desc: 'Match every pair', hover: 'flip ‘em all 💞' },
+  { id: 'quiz', emoji: '💭', title: 'How Well You Know Us', desc: 'A little quiz', hover: 'no pressure 😉' },
+  { id: 'scratch', emoji: '✨', title: 'A Secret For You', desc: 'Scratch to reveal', hover: 'shhh… 🤫' },
+  { id: 'puzzle', emoji: '🧩', title: 'Piece Us Together', desc: 'Solve the picture', hover: 'find the pieces 💝' },
+  { id: 'lovemeter', emoji: '💗', title: 'The Love Meter', desc: 'How much? find out', hover: 'spoiler: a lot 💕' },
 ]
 
 export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
@@ -45,7 +47,8 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
           {doneCount} / {GAME_IDS.length} unlocked
         </p>
 
-        <button
+        <motion.button
+          whileTap={tap}
           onClick={() => {
             play('click')
             onOpenStickers()
@@ -53,45 +56,73 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
           className="btn mt-5"
         >
           📖 Open our Sticker Book
-        </button>
+        </motion.button>
       </motion.header>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {GAMES.map((g, i) => {
           const isDone = !!completed[g.id]
           return (
-            <motion.button
+            <motion.div
               key={g.id}
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
               whileHover={{ y: -6 }}
-              onClick={() => {
-                play('click')
-                onOpenGame(g.id)
-              }}
-              className="glass relative overflow-hidden rounded-3xl p-6 text-left shadow-soft"
             >
-              <div className="text-5xl">{g.emoji}</div>
-              <h3 className="mt-3 text-xl font-bold text-[#6b4560]">{g.title}</h3>
-              <p className="text-sm text-[#7a5570]">{g.desc}</p>
-              <span
-                className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold ${
-                  isDone ? 'bg-mint/60 text-emerald-700' : 'bg-white/70 text-rose'
-                }`}
+              <TiltCard
+                whileTap={tap}
+                onClick={() => {
+                  play('click')
+                  onOpenGame(g.id)
+                }}
+                className="glass group relative block w-full overflow-hidden rounded-3xl p-6 text-left"
               >
-                {isDone ? 'done 💗' : 'play'}
-              </span>
-            </motion.button>
+                <div className="text-5xl">{g.emoji}</div>
+                <h3 className="mt-3 text-xl font-bold text-[#6b4560]">{g.title}</h3>
+                <p className="text-sm text-[#7a5570]">
+                  <span className="transition-opacity duration-200 group-hover:opacity-0">
+                    {g.desc}
+                  </span>
+                  <span className="absolute left-6 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    {g.hover}
+                  </span>
+                </p>
+                <span
+                  className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold ${
+                    isDone ? 'bg-mint/60 text-emerald-700' : 'bg-white/70 text-rose'
+                  }`}
+                >
+                  {isDone ? 'done 💗' : 'play'}
+                </span>
+              </TiltCard>
+            </motion.div>
           )
         })}
 
         {/* finale card */}
         <motion.button
           initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: GAMES.length * 0.08 }}
+          animate={
+            allDone
+              ? {
+                  opacity: 1,
+                  y: 0,
+                  boxShadow: [
+                    '0 0 0 0 rgba(255,143,177,0.0)',
+                    '0 0 0 10px rgba(255,143,177,0.25)',
+                    '0 0 0 0 rgba(255,143,177,0.0)',
+                  ],
+                }
+              : { opacity: 1, y: 0 }
+          }
+          transition={
+            allDone
+              ? { delay: GAMES.length * 0.08, boxShadow: { repeat: Infinity, duration: 1.8 } }
+              : { delay: GAMES.length * 0.08 }
+          }
           whileHover={allDone ? { y: -6 } : {}}
+          whileTap={tap}
           onClick={() => {
             if (!allDone) {
               play('error')
@@ -100,7 +131,7 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
             play('unlock')
             onOpenFinale()
           }}
-          className={`relative overflow-hidden rounded-3xl p-6 text-left shadow-soft ${
+          className={`gradient-ring relative overflow-hidden rounded-3xl p-6 text-left ${
             allDone
               ? 'bg-gradient-to-br from-rose to-periwinkle text-white'
               : 'glass'

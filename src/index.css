@@ -4,6 +4,10 @@
 
 :root {
   color-scheme: light;
+  /* one radius scale used across the app */
+  --r-sm: 1rem;
+  --r-md: 1.5rem;
+  --r-lg: 2rem;
 }
 
 html,
@@ -17,8 +21,8 @@ body {
   font-family: 'Quicksand', sans-serif;
   color: #5b3a52;
   background: linear-gradient(135deg, #ffe3f1 0%, #ffe9d6 25%, #e9dcff 55%, #d6ecff 80%, #d3f7ee 100%);
-  background-size: 300% 300%;
-  animation: shimmer 18s ease infinite;
+  background-size: 160% 160%;
+  animation: shimmer 40s ease-in-out infinite;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -29,6 +33,17 @@ body {
   100% { background-position: 0% 50%; }
 }
 
+@keyframes ringshift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes skeleton {
+  0% { background-position: 180% 0; }
+  100% { background-position: -80% 0; }
+}
+
 @layer components {
   .gradient-text {
     @apply bg-clip-text text-transparent;
@@ -37,9 +52,46 @@ body {
 
   .glass {
     background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.7);
+    /* soft outer depth + a lit top edge for a frosted, premium look */
+    box-shadow:
+      0 10px 30px -12px rgba(150, 90, 130, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  }
+
+  /* soft animated gradient ring for hero cards (gate + finale) */
+  .gradient-ring {
+    position: relative;
+  }
+  .gradient-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(130deg, #ff8fb1, #c9a0ff, #ffc59a, #ff8fb1);
+    background-size: 260% 260%;
+    animation: ringshift 8s ease infinite;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* shimmering skeleton for images that are still loading */
+  .skeleton {
+    background: linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.35) 30%,
+      rgba(255, 214, 232, 0.75) 50%,
+      rgba(255, 255, 255, 0.35) 70%
+    );
+    background-size: 220% 100%;
+    animation: skeleton 1.3s ease-in-out infinite;
   }
 
   .btn {
@@ -64,4 +116,17 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #ffb3d1;
   border-radius: 999px;
+}
+
+/* respect users who prefer less motion: freeze the shimmer + heavy loops */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+    background-position: 0% 50%;
+  }
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

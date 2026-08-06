@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
-import { spriteCellStyle, sheetUrlFor } from '../lib/sprite'
+import { useStickerSheet } from '../hooks/useStickerSheet'
+import { spriteCellStyle } from '../lib/sprite'
 
 const PAIRS = 6
 
@@ -18,18 +19,7 @@ function shuffle(arr) {
 export default function MemoryMatch({ onComplete }) {
   const play = useSound()
 
-  const sheet = content.stickerSheet
-  const sheetUrl = useMemo(() => sheetUrlFor(sheet), [sheet])
-  const [sheetOk, setSheetOk] = useState(false)
-
-  // preload the sticker sheet; fall back to emoji faces if it isn't there yet
-  useEffect(() => {
-    if (!sheetUrl) return
-    const img = new Image()
-    img.onload = () => setSheetOk(true)
-    img.onerror = () => setSheetOk(false)
-    img.src = sheetUrl
-  }, [sheetUrl])
+  const { sheet, sheetUrl, sheetOk } = useStickerSheet()
 
   // deck holds pair keys 0..5 (doubled + shuffled); the face is chosen at render
   const stickers = content.stickers.slice(0, PAIRS)

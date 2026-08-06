@@ -9,12 +9,13 @@ export default function ScratchCard({ onComplete }) {
   const [revealed, setRevealed] = useState(false)
   const drawing = useRef(false)
   const scratchedOnce = useRef(false)
+  const lastCheck = useRef(0)
   const note = content.notes.scratch
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const { width, height } = canvas
 
     // paint the foil overlay
@@ -44,7 +45,7 @@ export default function ScratchCard({ onComplete }) {
   const scratch = (e) => {
     if (!drawing.current) return
     const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const { x, y } = pos(e)
     ctx.beginPath()
     ctx.arc(x, y, 26, 0, Math.PI * 2)
@@ -53,13 +54,18 @@ export default function ScratchCard({ onComplete }) {
       scratchedOnce.current = true
       play('flip')
     }
-    checkCleared()
+    // sampling the whole buffer is costly — do it at most ~7x/sec
+    const now = performance.now()
+    if (now - lastCheck.current > 150) {
+      lastCheck.current = now
+      checkCleared()
+    }
   }
 
   const checkCleared = () => {
     if (revealed) return
     const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
     const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height)
     let clear = 0
     for (let i = 3; i < data.length; i += 40) {

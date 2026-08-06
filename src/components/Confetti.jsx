@@ -13,6 +13,7 @@ export default function Confetti({ pieces = 60 }) {
         y: 200 + Math.random() * 500,
         rotate: Math.random() * 720 - 360,
         delay: Math.random() * 0.3,
+        duration: 1.6 + Math.random(),
         color: COLORS[i % COLORS.length],
         heart: Math.random() > 0.6,
         size: 8 + Math.random() * 10,
@@ -27,7 +28,7 @@ export default function Confetti({ pieces = 60 }) {
           key={b.id}
           initial={{ opacity: 1, x: 0, y: -20, rotate: 0 }}
           animate={{ opacity: 0, x: b.x, y: b.y, rotate: b.rotate }}
-          transition={{ duration: 1.6 + Math.random(), delay: b.delay, ease: 'easeOut' }}
+          transition={{ duration: b.duration, delay: b.delay, ease: 'easeOut' }}
           className="absolute top-24"
           style={{ fontSize: b.size }}
         >

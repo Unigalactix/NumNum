@@ -1,25 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
-import { spriteCellStyle, sheetUrlFor } from '../lib/sprite'
+import { useStickerSheet } from '../hooks/useStickerSheet'
+import { spriteCellStyle } from '../lib/sprite'
 
 export default function StickerBook({ onClose }) {
   const play = useSound()
   const [zoom, setZoom] = useState(null)
-  const [sheetOk, setSheetOk] = useState(false)
-
-  const sheet = content.stickerSheet
-  const sheetUrl = useMemo(() => sheetUrlFor(sheet), [sheet])
-
-  // Only use the sprite sheet if it actually loads; else fall back to emoji.
-  useEffect(() => {
-    if (!sheetUrl) return
-    const img = new Image()
-    img.onload = () => setSheetOk(true)
-    img.onerror = () => setSheetOk(false)
-    img.src = sheetUrl
-  }, [sheetUrl])
+  const { sheet, sheetUrl, sheetOk } = useStickerSheet()
 
   return (
     <div className="mx-auto max-w-4xl px-5 pb-24 pt-16">

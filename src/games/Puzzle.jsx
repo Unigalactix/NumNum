@@ -51,6 +51,7 @@ export default function Puzzle({ onComplete }) {
   const play = useSound()
   const configured = content.puzzleImage || content.photos?.[0]
   const [imgOk, setImgOk] = useState(false)
+  const [loading, setLoading] = useState(!!configured)
   const [tiles, setTiles] = useState(shuffled)
   const [won, setWon] = useState(false)
 
@@ -62,8 +63,14 @@ export default function Puzzle({ onComplete }) {
   useEffect(() => {
     if (!configured) return
     const img = new Image()
-    img.onload = () => setImgOk(true)
-    img.onerror = () => setImgOk(false)
+    img.onload = () => {
+      setImgOk(true)
+      setLoading(false)
+    }
+    img.onerror = () => {
+      setImgOk(false)
+      setLoading(false)
+    }
     img.src = `${import.meta.env.BASE_URL}${configured}`
   }, [configured])
 
@@ -110,6 +117,9 @@ export default function Puzzle({ onComplete }) {
         }`}
         style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}
       >
+        {loading && (
+          <div className="skeleton absolute inset-0 z-10 rounded-3xl" />
+        )}
         {tiles.map((tile, idx) => {
           const isBlank = tile === TOTAL - 1
           if (isBlank && !won) return <div key={idx} />
