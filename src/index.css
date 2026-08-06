@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+  color: #5b3a52;
+  background: linear-gradient(135deg, #ffe3f1 0%, #ffe9d6 25%, #e9dcff 55%, #d6ecff 80%, #d3f7ee 100%);
+  background-size: 300% 300%;
+  animation: shimmer 18s ease infinite;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(120deg, #ff6fa5, #b57cff, #ff9a76);
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold
+      text-white shadow-soft transition-all duration-200 active:scale-95 disabled:opacity-50;
+    background-image: linear-gradient(120deg, #ff8fb1, #c9a0ff);
+  }
+
+  .btn:hover {
+    @apply -translate-y-0.5 shadow-glow;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold
+      text-rose transition-all duration-200 active:scale-95;
+    background: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* prettier scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-thumb {
+  background: #ffb3d1;
+  border-radius: 999px;
+}

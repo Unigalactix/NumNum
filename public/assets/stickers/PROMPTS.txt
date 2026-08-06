@@ -1,0 +1,26 @@
+╔══════════════════════════════════════════════════════════════╗
+║   💗  STICKER BOOK — using your sticker sheet  💗             ║
+╚══════════════════════════════════════════════════════════════╝
+
+You provided ONE image with many chibi stickers (a 3-column × 5-row grid).
+The site slices that single sheet automatically, so you only need to save
+one file.
+
+HOW TO ADD IT
+1. Save your sticker sheet image into THIS folder as:
+        sheet.png
+   (PNG or JPG both work — keep the whole grid, do NOT crop it).
+2. Refresh the site and open the Sticker Book from the hub.
+   Each cell of the grid becomes its own clickable, zoomable sticker.
+
+Until sheet.png exists, cute emoji placeholders show instead.
+
+IF THE SLICING LOOKS OFF
+The grid layout is set in src/content.js:
+        stickerSheet: { file: 'stickers/sheet.png', cols: 3, rows: 5 }
+- If your sheet has a different layout, change cols / rows to match.
+- Each sticker maps to a cell via { r, c } (row, column, 0-indexed) in the
+  `stickers` list — edit captions or add/remove entries freely.
+
+TIP: For pixel-perfect edges you could crop each sticker to its own PNG,
+but the sheet approach needs zero extra work and looks great.
