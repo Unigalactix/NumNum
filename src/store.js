@@ -4,6 +4,9 @@ import { persist } from 'zustand/middleware'
 // The 5 mini-games that must be completed to unlock the finale letter
 export const GAME_IDS = ['memory', 'quiz', 'scratch', 'puzzle', 'lovemeter']
 
+// Extra LinkedIn-style games — just for fun, they don't gate the finale.
+export const BONUS_GAME_IDS = ['pinpoint', 'tango', 'sudoku', 'zip', 'wend', 'patches']
+
 export const useStore = create(
   persist(
     (set, get) => ({

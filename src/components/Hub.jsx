@@ -13,6 +13,15 @@ const GAMES = [
   { id: 'lovemeter', emoji: '💗', title: 'The Love Meter', desc: 'How much? find out', hover: 'spoiler: a lot 💕' },
 ]
 
+const BONUS = [
+  { id: 'pinpoint', emoji: '🎯', title: 'Pinpoint Us', desc: 'Guess from 5 clues', hover: 'read the clues 💭' },
+  { id: 'tango', emoji: '⭐', title: 'Hearts & Stars', desc: 'Fill the logic grid', hover: 'no 3 in a row 💗' },
+  { id: 'sudoku', emoji: '🔢', title: 'Mini Sudoku', desc: '1–6, no repeats', hover: 'every box counts 💛' },
+  { id: 'zip', emoji: '🧵', title: 'Zip', desc: 'One path, 1→ 6', hover: 'trace it all 💞' },
+  { id: 'wend', emoji: '🔤', title: 'Wend', desc: 'Trace hidden words', hover: 'find our words 💌' },
+  { id: 'patches', emoji: '🎨', title: 'Patches', desc: 'Color the regions', hover: 'no matching neighbors 🌈' },
+]
+
 export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
   const play = useSound()
   const completed = useStore((s) => s.completed)
@@ -154,6 +163,58 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
             </motion.span>
           )}
         </motion.button>
+      </div>
+
+      {/* bonus games — just for fun, not required for the finale */}
+      <div className="mt-14">
+        <div className="text-center">
+          <h2 className="gradient-text font-script text-3xl sm:text-4xl">Bonus Games</h2>
+          <p className="mt-1 text-sm text-[#7a5570]">
+            little LinkedIn-style puzzles — just for fun 💫
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          {BONUS.map((g, i) => {
+            const isDone = !!completed[g.id]
+            return (
+              <motion.div
+                key={g.id}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                whileHover={{ y: -6 }}
+              >
+                <TiltCard
+                  whileTap={tap}
+                  onClick={() => {
+                    play('click')
+                    onOpenGame(g.id)
+                  }}
+                  className="glass group relative block w-full overflow-hidden rounded-3xl p-6 text-left"
+                >
+                  <div className="text-5xl">{g.emoji}</div>
+                  <h3 className="mt-3 text-xl font-bold text-[#6b4560]">{g.title}</h3>
+                  <p className="text-sm text-[#7a5570]">
+                    <span className="transition-opacity duration-200 group-hover:opacity-0">
+                      {g.desc}
+                    </span>
+                    <span className="absolute left-6 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      {g.hover}
+                    </span>
+                  </p>
+                  <span
+                    className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold ${
+                      isDone ? 'bg-mint/60 text-emerald-700' : 'bg-white/70 text-rose'
+                    }`}
+                  >
+                    {isDone ? 'done 💗' : 'play'}
+                  </span>
+                </TiltCard>
+              </motion.div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

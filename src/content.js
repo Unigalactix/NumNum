@@ -55,6 +55,21 @@ export const content = {
     { r: 4, c: 2, emoji: '📖', caption: 'Cozy reading cuddles' },
   ],
 
+  // Sticker Book album — each sheet is shown as a full, flip-through page.
+  // Drop more sheets into public/assets/stickers/ and add a line here.
+  stickerPages: [
+    { file: 'assets/stickers/sheet.png', title: 'Everyday Us', caption: 'the little moments 💗' },
+    { file: 'assets/stickers/sheet2.png', title: 'Silly Little Days', caption: 'our goofy side 🥰' },
+    { file: 'assets/stickers/sheet3.png', title: 'Us, Being Us', caption: 'just the two of us 💞' },
+    { file: 'assets/stickers/sheet4.png', title: 'Pinch, Honk & Giggles', caption: 'endless teasing 😆' },
+    { file: 'assets/stickers/sheet5.png', title: 'Your Daily Cuteness', caption: 'you, all day long ☕' },
+    { file: 'assets/stickers/sheet6.png', title: 'More of Our Moments', caption: 'a few more of us 💫' },
+    { file: 'assets/stickers/sheet7.png', title: 'Cozy Date Nights', caption: 'stay-in dates 🕯️' },
+    { file: 'assets/stickers/sheet8.png', title: 'Boba Thefts & Teasing', caption: 'mine now! 🧋' },
+    { file: 'assets/stickers/sheet9.png', title: 'Our LA Adventure', caption: 'city of angels 🌴' },
+    { file: 'assets/stickers/sheet10.png', title: 'Our Seattle Trip', caption: 'rainy-day us ☔' },
+  ],
+
   // Memory-match uses these pairs (emoji fallback if no photos)
   memoryEmojis: ['💖', '🥟', '🌸', '🎀', '🧸', '⭐'],
 
@@ -93,6 +108,51 @@ export const content = {
     },
   ],
 
+  // Pinpoint (LinkedIn-style): guess what connects the clues, revealed one by one.
+  pinpoint: {
+    intro: 'Five little clues, revealed one at a time. Guess what connects them 💭',
+    rounds: [
+      {
+        clues: [
+          'Soup dumplings 🥟',
+          'String beans 🫛',
+          'Fried rice 🍚',
+          'A whole lot of nervous smiles 😊',
+          'Din Tai Fung 🍜',
+        ],
+        options: ['A random Tuesday', 'Our first date', 'Your birthday', 'Movie night'],
+        answer: 1,
+      },
+      {
+        clues: [
+          'It fixes my whole day 🥰',
+          'I see it and forget my words',
+          'It shows up in every photo 📸',
+          'The first thing I look for',
+          'The last thing I think about at night',
+        ],
+        options: ['Your laugh', 'Your smile', 'Your cooking', 'Your playlist'],
+        answer: 1,
+      },
+      {
+        clues: [
+          'Boba runs 🧋',
+          'Late-night talks 🌙',
+          'Cooking chaos together 🍳',
+          'Cozy reading cuddles 📖',
+          'Absolutely anything — as long as it’s with you',
+        ],
+        options: ['My hobbies', 'Our favorite things to do', 'Chores', 'Errands'],
+        answer: 1,
+      },
+    ],
+  },
+
+  // Wend (word-search): trace these sweet words hidden in the letter grid.
+  wend: {
+    words: ['LOVE', 'KISS', 'HUG', 'CUTE', 'BOBA', 'SMILE', 'NEHA', 'FOREVER'],
+  },
+
   // Short sweet notes revealed after each mini-game
   notes: {
     memory: {
@@ -114,6 +174,30 @@ export const content = {
     lovemeter: {
       title: 'It overflowed 💗',
       body: 'Turns out there’s no number big enough. I just love you — endlessly.',
+    },
+    pinpoint: {
+      title: 'You pinpointed us 🎯',
+      body: 'A few tiny clues and you saw the whole picture — because you just get us.',
+    },
+    tango: {
+      title: 'Perfectly balanced 💗⭐',
+      body: 'Hearts and stars, all in their right place — kind of like how we fit together.',
+    },
+    sudoku: {
+      title: 'Everything in its place 🔢',
+      body: 'You sorted every little piece into place — steady and patient, just like you love me.',
+    },
+    zip: {
+      title: 'One perfect path 🧵',
+      body: 'One line, touching everything, in just the right order — that’s the path that led me to you.',
+    },
+    wend: {
+      title: 'You found every word 💌',
+      body: 'Little words hidden everywhere — and you found them all, the way you always find the good in everything.',
+    },
+    patches: {
+      title: 'You colored us in 🎨',
+      body: 'Every little patch in its own happy color — you make my whole world brighter, my love.',
     },
   },
 

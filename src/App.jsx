@@ -10,7 +10,6 @@ import { pageTransition, spring, tap } from './lib/motion'
 
 import FloatingHearts from './components/FloatingHearts'
 import GrainOverlay from './components/GrainOverlay'
-import HeartTrail from './components/HeartTrail'
 import Confetti from './components/Confetti'
 import Modal from './components/Modal'
 import Hub from './components/Hub'
@@ -23,6 +22,12 @@ import Quiz from './games/Quiz'
 import ScratchCard from './games/ScratchCard'
 import Puzzle from './games/Puzzle'
 import LoveMeter from './games/LoveMeter'
+import Pinpoint from './games/Pinpoint'
+import Tango from './games/Tango'
+import MiniSudoku from './games/MiniSudoku'
+import Zip from './games/Zip'
+import Wend from './games/Wend'
+import Patches from './games/Patches'
 
 const GAME_COMPONENTS = {
   memory: MemoryMatch,
@@ -30,6 +35,12 @@ const GAME_COMPONENTS = {
   scratch: ScratchCard,
   puzzle: Puzzle,
   lovemeter: LoveMeter,
+  pinpoint: Pinpoint,
+  tango: Tango,
+  sudoku: MiniSudoku,
+  zip: Zip,
+  wend: Wend,
+  patches: Patches,
 }
 
 export default function App() {
@@ -83,7 +94,6 @@ export default function App() {
     <div className="relative min-h-screen">
       <FloatingHearts />
       <GrainOverlay />
-      {entered && <HeartTrail />}
       {celebrate && <Confetti />}
 
       {/* top controls */}
