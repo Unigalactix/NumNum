@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        script: ['Pacifico', 'cursive'],
+        script: ['"Dancing Script"', 'cursive'],
         sans: ['Quicksand', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {

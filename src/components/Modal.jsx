@@ -1,7 +1,21 @@
+import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 // A soft, rounded modal used for revealed notes & the finale letter
 export default function Modal({ open, onClose, children, wide = false }) {
+  const panelRef = useRef(null)
+
+  // Close on Escape and pull focus into the dialog when it opens.
+  useEffect(() => {
+    if (!open) return
+    panelRef.current?.focus()
+    const onKey = (e) => {
+      if (e.key === 'Escape' && onClose) onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
   return (
     <AnimatePresence>
       {open && (
@@ -16,9 +30,13 @@ export default function Modal({ open, onClose, children, wide = false }) {
             onClick={onClose}
           />
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
             className={`glass relative w-full ${
               wide ? 'max-w-2xl' : 'max-w-md'
-            } rounded-3xl p-8 shadow-soft`}
+            } rounded-3xl p-8 shadow-soft outline-none`}
             initial={{ scale: 0.8, y: 30, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.8, y: 30, opacity: 0 }}

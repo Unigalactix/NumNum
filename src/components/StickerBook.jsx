@@ -83,7 +83,7 @@ export default function StickerBook({ onClose }) {
                           <img
                             src={pageUrl(page.file)}
                             alt={page.title}
-                            loading="eager"
+                            loading="lazy"
                             onError={() => setFailed((f) => ({ ...f, [index]: true }))}
                             className="h-full w-full object-contain"
                           />

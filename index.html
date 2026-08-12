@@ -8,21 +8,39 @@
     <title>For My Num Num 💕</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Non-blocking font load: Dancing Script for headings, Quicksand for body -->
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
+      />
+    </noscript>
     <link rel="preload" as="image" href="/NumNum/assets/diorama.jpg" />
     <link rel="preload" as="image" href="/NumNum/assets/stickers/sheet.png" />
     <link rel="manifest" href="/NumNum/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/NumNum/icon.svg" />
     <meta name="apple-mobile-web-app-title" content="Num Num" />
     <meta name="description" content="A little world of love, made just for you 💕" />
+
+    <!-- Open Graph / social share preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="For My Num Num 💕" />
+    <meta property="og:description" content="A tiny universe of games, stickers and love — made just for you." />
+    <meta property="og:image" content="https://unigalactix.github.io/NumNum/assets/diorama.jpg" />
+    <meta property="og:url" content="https://unigalactix.github.io/NumNum/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="For My Num Num 💕" />
+    <meta name="twitter:description" content="A tiny universe of games, stickers and love — made just for you." />
+    <meta name="twitter:image" content="https://unigalactix.github.io/NumNum/assets/diorama.jpg" />
+
+    <!-- Consistent emoji rendering across every device (Twemoji) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@twemoji/api@15.1.0/dist/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div id="root"></div>

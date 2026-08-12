@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { content } from './content'
 import { useStore } from './store'
 import { useSound } from './hooks/useSound'
@@ -56,12 +56,36 @@ export default function App() {
   const setView = useStore((s) => s.setView)
   const play = useSound()
   useAmbientMusic()
+  const reduce = useReducedMotion()
 
   const [note, setNote] = useState(null) // reward note after a game
   const [noteSticker, setNoteSticker] = useState(null) // random sticker for the note
   const [celebrate, setCelebrate] = useState(false) // confetti burst on a win
+  const [askReset, setAskReset] = useState(false) // styled "start over?" confirm
+  const [splash, setSplash] = useState(!reduce) // brief intro splash on first load
 
   const { sheet, sheetUrl, sheetOk } = useStickerSheet()
+
+  // Fade the intro splash out shortly after load.
+  useEffect(() => {
+    if (!splash) return
+    const id = setTimeout(() => setSplash(false), 1500)
+    return () => clearTimeout(id)
+  }, [splash])
+
+  // Render every emoji as a Twemoji image so it looks identical on every device.
+  useEffect(() => {
+    let tries = 0
+    const parse = () =>
+      window.twemoji
+        ? (window.twemoji.parse(document.body, { folder: 'svg', ext: '.svg' }), true)
+        : false
+    if (parse()) return
+    const id = setInterval(() => {
+      if (parse() || ++tries > 40) clearInterval(id)
+    }, 100)
+    return () => clearInterval(id)
+  }, [view, entered, note, celebrate, splash, askReset])
 
   // Preload the puzzle photo at startup so it never "pops in" when the game opens.
   useEffect(() => {
@@ -95,6 +119,29 @@ export default function App() {
       <FloatingHearts />
       <GrainOverlay />
       {celebrate && <Confetti />}
+
+      <AnimatePresence>
+        {splash && (
+          <motion.div
+            key="splash"
+            className="fixed inset-0 z-[60] grid place-items-center"
+            style={{ background: 'linear-gradient(135deg,#ffe3f1,#e9dcff,#d3f7ee)' }}
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={spring}
+              className="text-center"
+            >
+              <div className="text-7xl">💗</div>
+              <p className="gradient-text mt-3 font-script text-4xl">For My Num Num</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* top controls */}
       {entered && (
@@ -136,7 +183,7 @@ export default function App() {
               onOpenFinale={() => setView('finale')}
               onOpenStickers={() => setView('stickers')}
             />
-            <Footer onReset={reset} play={play} />
+            <Footer onAskReset={() => setAskReset(true)} play={play} />
           </motion.div>
         ) : view === 'finale' ? (
           <motion.div key="finale" {...pageTransition}>
@@ -192,17 +239,43 @@ export default function App() {
           </div>
         )}
       </Modal>
+
+      {/* styled "start over" confirmation (replaces the native confirm dialog) */}
+      <Modal open={askReset} onClose={() => setAskReset(false)}>
+        <div className="text-center">
+          <div className="mb-3 text-5xl">↺</div>
+          <h3 className="gradient-text font-script text-3xl">Start over?</h3>
+          <p className="mt-3 text-[#6b4560]">
+            This clears your progress and replays everything from the very beginning.
+          </p>
+          <div className="mt-6 flex justify-center gap-3">
+            <button onClick={() => setAskReset(false)} className="btn-ghost">
+              stay here
+            </button>
+            <button
+              onClick={() => {
+                play('click')
+                reset()
+                setAskReset(false)
+              }}
+              className="btn"
+            >
+              start over
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
 
-function Footer({ onReset, play }) {
+function Footer({ onAskReset, play }) {
   return (
     <footer className="pointer-events-none fixed bottom-3 left-0 right-0 z-30 flex justify-center">
       <button
         onClick={() => {
           play('click')
-          if (confirm('Replay everything from the start?')) onReset()
+          onAskReset()
         }}
         className="pointer-events-auto rounded-full bg-white/50 px-4 py-1.5 text-xs font-semibold text-rose/80 backdrop-blur transition hover:bg-white/80"
       >

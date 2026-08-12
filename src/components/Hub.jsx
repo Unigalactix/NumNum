@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { content } from '../content'
 import { useStore, GAME_IDS } from '../store'
 import { useSound } from '../hooks/useSound'
@@ -6,7 +7,7 @@ import TiltCard from './TiltCard'
 import { tap } from '../lib/motion'
 
 const GAMES = [
-  { id: 'memory', emoji: '🃏', title: 'Memory of Us', desc: 'Match every pair', hover: 'flip ‘em all 💞' },
+  { id: 'memory', emoji: '🃏', title: 'Memory of Us', desc: 'Match every pair', hover: 'flip ’em all 💞' },
   { id: 'quiz', emoji: '💭', title: 'How Well You Know Us', desc: 'A little quiz', hover: 'no pressure 😉' },
   { id: 'scratch', emoji: '✨', title: 'A Secret For You', desc: 'Scratch to reveal', hover: 'shhh… 🤫' },
   { id: 'puzzle', emoji: '🧩', title: 'Piece Us Together', desc: 'Solve the picture', hover: 'find the pieces 💝' },
@@ -24,6 +25,7 @@ const BONUS = [
 
 export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
   const play = useSound()
+  const [lockHint, setLockHint] = useState(false)
   const completed = useStore((s) => s.completed)
   const doneCount = GAME_IDS.filter((id) => completed[id]).length
   const allDone = doneCount === GAME_IDS.length
@@ -38,7 +40,7 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
         <h1 className="gradient-text font-script text-5xl sm:text-6xl">
           {content.site.title}
         </h1>
-        <p className="mt-2 text-lg text-[#7a5570]">{content.site.tagline}</p>
+        <p className="mt-2 text-lg text-[#6a4360]">{content.site.tagline}</p>
 
         {/* progress hearts */}
         <div className="mt-4 flex items-center justify-center gap-1.5">
@@ -135,6 +137,8 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
           onClick={() => {
             if (!allDone) {
               play('error')
+              setLockHint(true)
+              setTimeout(() => setLockHint(false), 2200)
               return
             }
             play('unlock')
@@ -169,7 +173,7 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
       <div className="mt-14">
         <div className="text-center">
           <h2 className="gradient-text font-script text-3xl sm:text-4xl">Bonus Games</h2>
-          <p className="mt-1 text-sm text-[#7a5570]">
+          <p className="mt-1 text-sm text-[#6a4360]">
             little LinkedIn-style puzzles — just for fun 💫
           </p>
         </div>
@@ -216,6 +220,20 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
           })}
         </div>
       </div>
+
+      <AnimatePresence>
+        {lockHint && (
+          <motion.div
+            key="lockhint"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="glass fixed bottom-16 left-1/2 z-40 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-[#6b4560] shadow-soft"
+          >
+            Finish all 5 games to unlock the letter 💗
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

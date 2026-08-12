@@ -111,6 +111,22 @@ body {
   }
 }
 
+/* clear keyboard focus ring for accessibility */
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 3px solid #b57cff;
+  outline-offset: 3px;
+}
+
+/* Twemoji renders each emoji as an inline image — keep it sized like text */
+img.emoji,
+img.twemoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.125em;
+  display: inline-block;
+}
+
 /* prettier scrollbar */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-thumb {
