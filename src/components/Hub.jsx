@@ -10,25 +10,27 @@ const GAMES = [
   { id: 'memory', emoji: '🃏', title: 'Memory of Us', desc: 'Match every pair', hover: 'flip ’em all 💞' },
   { id: 'quiz', emoji: '💭', title: 'How Well You Know Us', desc: 'A little quiz', hover: 'no pressure 😉' },
   { id: 'scratch', emoji: '✨', title: 'A Secret For You', desc: 'Scratch to reveal', hover: 'shhh… 🤫' },
-  { id: 'puzzle', emoji: '🧩', title: 'Piece Us Together', desc: 'Solve the picture', hover: 'find the pieces 💝' },
-  { id: 'lovemeter', emoji: '💗', title: 'The Love Meter', desc: 'How much? find out', hover: 'spoiler: a lot 💕' },
+  { id: 'pinpoint', emoji: '🎯', title: 'Pinpoint Us', desc: 'Guess from 5 clues', hover: 'read the clues 💭' },
+  { id: 'tango', emoji: '⭐', title: 'Hearts & Stars', desc: 'Fill the logic grid', hover: 'no 3 in a row 💗' },
 ]
 
 const BONUS = [
-  { id: 'pinpoint', emoji: '🎯', title: 'Pinpoint Us', desc: 'Guess from 5 clues', hover: 'read the clues 💭' },
-  { id: 'tango', emoji: '⭐', title: 'Hearts & Stars', desc: 'Fill the logic grid', hover: 'no 3 in a row 💗' },
+  { id: 'puzzle', emoji: '🧩', title: 'Piece Us Together', desc: 'Solve the picture', hover: 'find the pieces 💝' },
+  { id: 'lovemeter', emoji: '💗', title: 'The Love Meter', desc: 'How much? find out', hover: 'spoiler: a lot 💕' },
   { id: 'sudoku', emoji: '🔢', title: 'Mini Sudoku', desc: '1–6, no repeats', hover: 'every box counts 💛' },
   { id: 'zip', emoji: '🧵', title: 'Zip', desc: 'One path, 1→ 6', hover: 'trace it all 💞' },
   { id: 'wend', emoji: '🔤', title: 'Wend', desc: 'Trace hidden words', hover: 'find our words 💌' },
   { id: 'patches', emoji: '🎨', title: 'Patches', desc: 'Color the regions', hover: 'no matching neighbors 🌈' },
 ]
 
-export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
+export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLetters }) {
   const play = useSound()
   const [lockHint, setLockHint] = useState(false)
   const completed = useStore((s) => s.completed)
   const doneCount = GAME_IDS.filter((id) => completed[id]).length
   const allDone = doneCount === GAME_IDS.length
+  // The Love Letter opens when it's awaiting a new letter, or once all games are done.
+  const finaleReady = allDone || !!content.finale.awaiting
 
   return (
     <div className="mx-auto max-w-4xl px-5 pb-24 pt-8">
@@ -58,16 +60,28 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
           {doneCount} / {GAME_IDS.length} unlocked
         </p>
 
-        <motion.button
-          whileTap={tap}
-          onClick={() => {
-            play('click')
-            onOpenStickers()
-          }}
-          className="btn mt-5"
-        >
-          📖 Open our Sticker Book
-        </motion.button>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <motion.button
+            whileTap={tap}
+            onClick={() => {
+              play('click')
+              onOpenStickers()
+            }}
+            className="btn"
+          >
+            📖 Open our Sticker Book
+          </motion.button>
+          <motion.button
+            whileTap={tap}
+            onClick={() => {
+              play('click')
+              onOpenLetters()
+            }}
+            className="btn-ghost"
+          >
+            💌 Previous Letters
+          </motion.button>
+        </div>
       </motion.header>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -115,7 +129,7 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
         <motion.button
           initial={{ opacity: 0, y: 24 }}
           animate={
-            allDone
+            finaleReady
               ? {
                   opacity: 1,
                   y: 0,
@@ -128,14 +142,14 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
               : { opacity: 1, y: 0 }
           }
           transition={
-            allDone
+            finaleReady
               ? { delay: GAMES.length * 0.08, boxShadow: { repeat: Infinity, duration: 1.8 } }
               : { delay: GAMES.length * 0.08 }
           }
-          whileHover={allDone ? { y: -6 } : {}}
+          whileHover={finaleReady ? { y: -6 } : {}}
           whileTap={tap}
           onClick={() => {
-            if (!allDone) {
+            if (!finaleReady) {
               play('error')
               setLockHint(true)
               setTimeout(() => setLockHint(false), 2200)
@@ -145,19 +159,23 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers }) {
             onOpenFinale()
           }}
           className={`gradient-ring relative overflow-hidden rounded-3xl p-6 text-left ${
-            allDone
+            finaleReady
               ? 'bg-gradient-to-br from-rose to-periwinkle text-white'
               : 'glass'
           }`}
         >
-          <div className="text-5xl">{allDone ? '💌' : '🔒'}</div>
-          <h3 className={`mt-3 text-xl font-bold ${allDone ? 'text-white' : 'text-[#6b4560]'}`}>
-            The Final Letter
+          <div className="text-5xl">{finaleReady ? '💌' : '🔒'}</div>
+          <h3 className={`mt-3 text-xl font-bold ${finaleReady ? 'text-white' : 'text-[#6b4560]'}`}>
+            The Love Letter
           </h3>
-          <p className={`text-sm ${allDone ? 'text-white/90' : 'text-[#7a5570]'}`}>
-            {allDone ? 'It’s ready — open it 💗' : 'Finish all 5 to unlock'}
+          <p className={`text-sm ${finaleReady ? 'text-white/90' : 'text-[#7a5570]'}`}>
+            {finaleReady
+              ? content.finale.awaiting
+                ? 'No new letter yet — peek inside 💌'
+                : 'It’s ready — open it 💗'
+              : 'Finish all 5 to unlock'}
           </p>
-          {allDone && (
+          {finaleReady && (
             <motion.span
               className="absolute right-4 top-4"
               animate={{ scale: [1, 1.3, 1] }}

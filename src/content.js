@@ -14,10 +14,14 @@ export const content = {
 
   // The entry gate — she must answer this to open the site
   gate: {
-    question: 'Before you come in… answer this. What was our first meal together?',
-    answer: 'Din Tai Fung',
-    hint: 'Noodles 🍜, string beans 🫛 and Fried rice 🍚.',
-    success: 'Yesss — that’s where it all began. Come in, my love… 💕',
+    question: 'Before you come in… answer this. What was the first movie we watched in a theatre?',
+    // Any of these (case/spacing/punctuation-insensitive) unlocks the gate.
+    answers: ['Spider Man Brand New Day', 'Brand New Day'],
+    answer: 'Spider-Man: Brand New Day',
+    // Shown when she types just “Spider Man” without the rest.
+    almost: 'So close, my love 🥰 you’ve got the hero right… now give me the rest of it 💫',
+    hint: 'Okay okay… our very first theatre date 🎬🍿 — you totally know this one 💗',
+    success: 'Yesss — that’s the one. Come in, my love… 💕',
   },
 
   // Photos: drop files into /public/assets and list them here.
@@ -83,6 +87,37 @@ export const content = {
     'Just… you. Every single part of you. 💫',
   ],
 
+  // "A Secret For You" (Scratch card) — the reveal changes with WHEN she opens it.
+  // Buckets: morning (5–11), afternoon (12–16), evening (17–20), night (21–4),
+  // plus a special weekend set and a `default` fallback. One is picked at random
+  // from the matching bucket, so it feels fresh each time.
+  secrets: {
+    morning: [
+      { title: 'good morning, num num ☀️', body: 'i hope your coffee’s warm and your day is soft. you’re my favorite thought to wake up to. 💗' },
+      { title: 'morning, sleepyhead 🌅', body: 'somewhere out here i’m already smiling because you exist. go be wonderful today. ☕' },
+    ],
+    afternoon: [
+      { title: 'hi, mid-day you 🌤️', body: 'a little reminder in the middle of your busy day — you’re loved, deeply, exactly as you are. 💕' },
+      { title: 'afternoon pick-me-up ☕', body: 'whatever the day’s throwing at you, i’m in your corner. take a breath, my love. 💫' },
+    ],
+    evening: [
+      { title: 'good evening, my love 🌇', body: 'the day’s winding down and i’m thinking of you, like always. you made today better just by being in it. 💗' },
+      { title: 'evening, gorgeous 🌆', body: 'come rest — you did so much today. i’m so proud of you, and so lucky it’s you. 🕯️' },
+    ],
+    night: [
+      { title: 'sweet dreams, num num 🌙', body: 'if you’re reading this late, put the phone down soon, okay? dream of us. i’ll be right here. 💤' },
+      { title: 'late-night secret ✨', body: 'the world’s quiet now, but my heart’s still loud about you. goodnight, my whole heart. 🌛' },
+    ],
+    weekend: [
+      { title: 'happy weekend, my love 🥞', body: 'no rushing today. slow mornings, your laugh, maybe boba later — i just want the whole day with you. 💗' },
+      { title: 'weekend mode: us 🧋', body: 'two days of you-and-me energy. cuddles, cooking chaos, zero plans required. you + me is the plan. 💞' },
+    ],
+    default: [
+      { title: 'a little secret ✨', body: 'no matter what kind of day it is, you are the best part of mine.' },
+      { title: 'just because 💌', body: 'no reason, no occasion — i just love you. that’s the whole secret. 💗' },
+    ],
+  },
+
   // Relationship quiz — placeholder questions, edit freely!
   // `answer` is the index (0-based) of the correct option.
   quiz: [
@@ -105,6 +140,11 @@ export const content = {
       question: 'How long do I want this to last?',
       options: ['A while', 'Forever and then some', 'Undecided'],
       answer: 1,
+    },
+    {
+      question: 'What was the first movie we watched in a theatre?',
+      options: ['Spider-Man: Brand New Day', 'Barbie', 'Inside Out 2'],
+      answer: 0,
     },
   ],
 
@@ -143,6 +183,17 @@ export const content = {
           'Absolutely anything — as long as it’s with you',
         ],
         options: ['My hobbies', 'Our favorite things to do', 'Chores', 'Errands'],
+        answer: 1,
+      },
+      {
+        clues: [
+          'Big screen, dim lights 🎬',
+          'A shared tub of popcorn 🍿',
+          'Our very first theatre date',
+          'A friendly neighborhood hero 🕷️',
+          'Spider-Man: Brand New Day',
+        ],
+        options: ['A cozy night in', 'Our first movie in a theatre', 'A concert', 'A road trip'],
         answer: 1,
       },
     ],
@@ -201,12 +252,29 @@ export const content = {
     },
   },
 
-  // The grand finale letter — unlocked after all games are done
-  finale: {
-    title: 'My Love,',
-    body: `i never trusted my life to give me another chance to fall in love and take it all in. but when we texted for the first time i knew we had something.
+  // Past love letters — kept safe here; each opens with the same envelope + typing.
+  // To add a new letter, drop an object at the TOP of this list and set `date`
+  // to the moment you wrote it, e.g. 'August 12, 2026 · 10:30 AM'.
+  previousLetters: [
+    {
+      date: 'August 7, 2026 · 10:30 AM',
+      title: 'My Love,',
+      body: `i never trusted my life to give me another chance to fall in love and take it all in. but when we texted for the first time i knew we had something.
 
 even when we have our odds, we have a cute way of blending them — a cute way of liking each other, loving each other, compromising for each other.`,
-    signoff: 'my best, my love. i love you. 💗',
+      signoff: 'my best, my love. i love you. 💗',
+    },
+  ],
+
+  // The Love Letter (finale) — currently awaiting the next one to be written.
+  // `awaiting: true` means there's no new letter, so the finale opens freely
+  // (no need to finish the games). Set it to false when a real letter is added.
+  finale: {
+    awaiting: true,
+    title: 'Awaiting a new letter…',
+    body: `no new letter waiting just yet, my love — but there’s always another one on the way. 💌
+
+until then, every letter i’ve written you is kept safe in “Previous Letters.” reread them whenever you miss my words. 💗`,
+    signoff: 'yours, always. 💗',
   },
 }

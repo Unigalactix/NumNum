@@ -1,6 +1,21 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
+
+// Pick a hidden message based on WHEN she opens the card (time of day + weekend).
+function pickSecret(secrets) {
+  if (!secrets) return null
+  const now = new Date()
+  const h = now.getHours()
+  const day = now.getDay() // 0 Sun … 6 Sat
+  const isWeekend = day === 0 || day === 6
+  const slot =
+    h < 5 ? 'night' : h < 12 ? 'morning' : h < 17 ? 'afternoon' : h < 21 ? 'evening' : 'night'
+  // On weekends, show a weekend note about half the time; otherwise it's time-of-day.
+  const key = isWeekend && secrets.weekend?.length && Math.random() < 0.5 ? 'weekend' : slot
+  const list = secrets[key]?.length ? secrets[key] : secrets.default
+  return list?.length ? list[Math.floor(Math.random() * list.length)] : null
+}
 
 // Canvas scratch-to-reveal card
 export default function ScratchCard({ onComplete }) {
@@ -10,7 +25,8 @@ export default function ScratchCard({ onComplete }) {
   const drawing = useRef(false)
   const scratchedOnce = useRef(false)
   const lastCheck = useRef(0)
-  const note = content.notes.scratch
+  // Chosen once per open so the reveal stays stable while she scratches.
+  const note = useMemo(() => pickSecret(content.secrets) || content.notes.scratch, [])
 
   useEffect(() => {
     const canvas = canvasRef.current

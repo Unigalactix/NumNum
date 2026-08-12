@@ -15,17 +15,23 @@ export default function RiddleGate() {
   const [showHint, setShowHint] = useState(false)
   const [showAnswer, setShowAnswer] = useState(false)
   const [error, setError] = useState(false)
+  const [almost, setAlmost] = useState(false)
   const [ok, setOk] = useState(false)
 
   const submit = (e) => {
     e.preventDefault()
-    if (normalize(value) === normalize(gate.answer)) {
+    const guess = normalize(value)
+    const accepted = (gate.answers || [gate.answer]).map(normalize)
+    if (accepted.includes(guess)) {
       play('unlock')
       setError(false)
+      setAlmost(false)
       setOk(true)
       setTimeout(() => enter(), 1900)
     } else {
       play('error')
+      // “Spider Man” alone isn't enough — nudge her gently to add the rest.
+      setAlmost(guess.includes('spiderman') && !guess.includes('brandnewday'))
       setError(true)
       setTimeout(() => setError(false), 600)
     }
@@ -87,6 +93,16 @@ export default function RiddleGate() {
               </button>
             </form>
 
+            {almost && (
+              <motion.p
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 font-script text-lg text-rose"
+              >
+                {gate.almost}
+              </motion.p>
+            )}
+
             <button
               onClick={() => {
                 play('click')
@@ -104,13 +120,13 @@ export default function RiddleGate() {
                 className="mt-4 rounded-2xl bg-white/70 p-4"
               >
                 <p className="font-script text-xl text-rose">
-                  I KNEW you'd click the hint 😏
+                  Seriously? You were asking for a hint on this question? 😏
                 </p>
                 <p className="mt-1 text-sm text-[#7a5570]">{gate.hint}</p>
 
                 {showAnswer ? (
                   <p className="mt-3 text-base font-semibold text-periwinkle">
-                    It's {gate.answer} 🥟💕
+                    It's {gate.answer} 🎬💕
                   </p>
                 ) : (
                   <button

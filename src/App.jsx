@@ -15,6 +15,7 @@ import Modal from './components/Modal'
 import Hub from './components/Hub'
 import FinaleLetter from './components/FinaleLetter'
 import StickerBook from './components/StickerBook'
+import PreviousLetters from './components/PreviousLetters'
 
 import RiddleGate from './games/RiddleGate'
 import MemoryMatch from './games/MemoryMatch'
@@ -96,7 +97,7 @@ export default function App() {
   }, [])
 
   const ActiveGame =
-    view !== 'hub' && view !== 'finale' && view !== 'stickers'
+    view !== 'hub' && view !== 'finale' && view !== 'stickers' && view !== 'letters'
       ? GAME_COMPONENTS[view]
       : null
 
@@ -182,16 +183,24 @@ export default function App() {
               onOpenGame={(id) => setView(id)}
               onOpenFinale={() => setView('finale')}
               onOpenStickers={() => setView('stickers')}
+              onOpenLetters={() => setView('letters')}
             />
             <Footer onAskReset={() => setAskReset(true)} play={play} />
           </motion.div>
         ) : view === 'finale' ? (
           <motion.div key="finale" {...pageTransition}>
-            <FinaleLetter onClose={() => setView('hub')} />
+            <FinaleLetter
+              onClose={() => setView('hub')}
+              onOpenPrevious={() => setView('letters')}
+            />
           </motion.div>
         ) : view === 'stickers' ? (
           <motion.div key="stickers" {...pageTransition}>
             <StickerBook onClose={() => setView('hub')} />
+          </motion.div>
+        ) : view === 'letters' ? (
+          <motion.div key="letters" {...pageTransition}>
+            <PreviousLetters onClose={() => setView('hub')} />
           </motion.div>
         ) : (
           <motion.div
