@@ -40,7 +40,12 @@ export const content = {
   // Save that sheet as public/assets/stickers/sheet.png (a 3-column × 5-row grid).
   // Each sticker below maps to a cell by row (r) and column (c), 0-indexed.
   // If the sheet is missing, the cute emoji placeholder shows instead.
-  stickerSheet: { file: 'assets/stickers/sheet.png', cols: 3, rows: 5 },
+  stickerSheet: {
+    file: 'assets/stickers/sheet.png',
+    cols: 3,
+    rows: 5,
+    cellAspectRatio: 1.25,
+  },
   stickers: [
     { r: 0, c: 0, emoji: '🤗', caption: 'Warm hugs' },
     { r: 0, c: 1, emoji: '🍳', caption: 'Cooking chaos together' },

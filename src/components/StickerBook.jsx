@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
@@ -13,11 +13,19 @@ export default function StickerBook({ onClose }) {
   const [dir, setDir] = useState(0)
   const [zoom, setZoom] = useState(false)
   const [failed, setFailed] = useState({})
+  const [loaded, setLoaded] = useState({})
+  const zoomRef = useRef(null)
 
   const page = pages[index]
   const total = pages.length
 
+  useEffect(() => {
+    if (!zoom) return
+    zoomRef.current?.focus()
+  }, [zoom])
+
   const go = (next) => {
+    if (total < 2) return
     const target = (next + total) % total
     if (target === index) return
     play('flip')
@@ -48,54 +56,53 @@ export default function StickerBook({ onClose }) {
         <p className="mt-10 text-center text-[#7a5570]">Add sticker sheets to get started.</p>
       ) : (
         <>
-          <div className="mt-8 flex items-center justify-center gap-3 sm:gap-5">
-            <NavButton dir="prev" onClick={() => go(index - 1)} />
-
-            <div className="relative flex-1" style={{ maxWidth: 560 }}>
-              <div className="glass overflow-hidden rounded-[2rem] p-4 shadow-soft">
-                <div className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-3xl bg-white">
-                  <AnimatePresence mode="popLayout" custom={dir}>
-                    <motion.div
-                      key={index}
-                      custom={dir}
-                      initial={{ opacity: 0, x: dir >= 0 ? 60 : -60, rotate: dir >= 0 ? 4 : -4 }}
-                      animate={{ opacity: 1, x: 0, rotate: 0 }}
-                      exit={{ opacity: 0, x: dir >= 0 ? -60 : 60, rotate: dir >= 0 ? -4 : 4 }}
-                      transition={spring}
-                      className="absolute inset-0 grid place-items-center p-3"
+          <div className="glass relative mx-auto mt-8 max-w-[38rem] rounded-[2rem] p-2.5 shadow-soft sm:p-4">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-[#fffafc] shadow-inner sm:rounded-3xl">
+              <AnimatePresence mode="popLayout" custom={dir}>
+                <motion.div
+                  key={index}
+                  custom={dir}
+                  initial={{ opacity: 0, x: dir >= 0 ? 60 : -60, rotate: dir >= 0 ? 2 : -2 }}
+                  animate={{ opacity: 1, x: 0, rotate: 0 }}
+                  exit={{ opacity: 0, x: dir >= 0 ? -60 : 60, rotate: dir >= 0 ? -2 : 2 }}
+                  transition={spring}
+                  className="absolute inset-0 grid place-items-center p-2 sm:p-4"
+                >
+                  {failed[index] ? (
+                    <div className="text-center">
+                      <div className="text-6xl">🩹</div>
+                      <p className="mt-2 text-sm font-semibold text-rose/70">
+                        couldn’t load this page
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        play('pop')
+                        setZoom(true)
+                      }}
+                      className="relative h-full w-full cursor-zoom-in"
+                      aria-label={`Zoom ${page.title}`}
                     >
-                      {failed[index] ? (
-                        <div className="text-center">
-                          <div className="text-6xl">🩹</div>
-                          <p className="mt-2 text-sm font-semibold text-rose/70">
-                            couldn’t load this page
-                          </p>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            play('pop')
-                            setZoom(true)
-                          }}
-                          className="h-full w-full"
-                          aria-label="Zoom this page"
-                        >
-                          <img
-                            src={pageUrl(page.file)}
-                            alt={page.title}
-                            loading="lazy"
-                            onError={() => setFailed((f) => ({ ...f, [index]: true }))}
-                            className="h-full w-full object-contain"
-                          />
-                        </button>
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
-            </div>
+                      {!loaded[index] && <span className="skeleton absolute inset-0 rounded-2xl" />}
+                      <img
+                        src={pageUrl(page.file)}
+                        alt={page.title}
+                        loading="eager"
+                        onLoad={() => setLoaded((state) => ({ ...state, [index]: true }))}
+                        onError={() => setFailed((state) => ({ ...state, [index]: true }))}
+                        className={`h-full w-full object-contain transition-opacity duration-300 ${
+                          loaded[index] ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      />
+                    </button>
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
-            <NavButton dir="next" onClick={() => go(index + 1)} />
+              <NavButton dir="prev" onClick={() => go(index - 1)} disabled={total < 2} />
+              <NavButton dir="next" onClick={() => go(index + 1)} disabled={total < 2} />
+            </div>
           </div>
 
           <div className="mt-5 text-center">
@@ -111,11 +118,14 @@ export default function StickerBook({ onClose }) {
               <button
                 key={p.file}
                 onClick={() => {
+                  if (i === index) return
                   play('flip')
                   setDir(i > index ? 1 : -1)
                   setIndex(i)
                 }}
                 aria-label={`Go to ${p.title}`}
+                aria-current={i === index ? 'page' : undefined}
+                title={p.title}
                 className={`h-2.5 rounded-full transition-all ${
                   i === index ? 'w-6 bg-rose' : 'w-2.5 bg-white/70 hover:bg-rose/40'
                 }`}
@@ -125,44 +135,57 @@ export default function StickerBook({ onClose }) {
         </>
       )}
 
-      <AnimatePresence>
-        {zoom && page && !failed[index] && (
+      {zoom && page && !failed[index] && (
+        <div
+          ref={zoomRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${page.title} enlarged`}
+          tabIndex={-1}
+          onClick={() => setZoom(false)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') setZoom(false)
+          }}
+          className="fixed inset-0 z-50 grid place-items-center bg-rose/30 p-4 outline-none backdrop-blur-sm"
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setZoom(false)}
-            className="fixed inset-0 z-50 grid place-items-center bg-rose/30 p-6 backdrop-blur-sm"
+            initial={{ scale: 0.8, y: 24, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            transition={spring}
+            onClick={(event) => event.stopPropagation()}
+            className="glass relative flex max-h-[90vh] w-full max-w-2xl flex-col items-center gap-4 rounded-3xl p-5 shadow-soft sm:p-8"
           >
-            <motion.div
-              initial={{ scale: 0.7 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.7 }}
-              transition={spring}
-              className="flex flex-col items-center gap-4"
+            <button
+              onClick={() => setZoom(false)}
+              aria-label="Close enlarged sticker page"
+              className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/80 text-xl text-rose shadow-soft transition hover:scale-110"
             >
-              <img
-                src={pageUrl(page.file)}
-                alt={page.title}
-                className="max-h-[75vh] max-w-[85vw] rounded-3xl bg-white p-3 shadow-2xl"
-              />
-              <p className="font-script text-2xl text-white drop-shadow">{page.title}</p>
-            </motion.div>
+              ×
+            </button>
+            <img
+              src={pageUrl(page.file)}
+              alt={page.title}
+              className="max-h-[68vh] max-w-full rounded-2xl bg-white object-contain shadow-soft"
+            />
+            <h3 className="font-script text-2xl text-[#6b4560]">{page.title}</h3>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }
 
-function NavButton({ dir, onClick }) {
+function NavButton({ dir, onClick, disabled }) {
   return (
     <motion.button
       whileTap={{ scale: 0.9 }}
       whileHover={{ scale: 1.08 }}
       onClick={onClick}
+      disabled={disabled}
       aria-label={dir === 'prev' ? 'Previous page' : 'Next page'}
-      className="grid h-12 w-12 shrink-0 place-items-center rounded-full glass text-xl text-rose shadow-soft"
+      className={`glass absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-2xl text-rose shadow-soft disabled:hidden sm:h-12 sm:w-12 ${
+        dir === 'prev' ? 'left-2 sm:left-3' : 'right-2 sm:right-3'
+      }`}
     >
       {dir === 'prev' ? '‹' : '›'}
     </motion.button>

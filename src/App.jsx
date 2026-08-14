@@ -234,7 +234,7 @@ export default function App() {
                 initial={{ scale: 0, rotate: -12 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={spring}
-                className="mx-auto mb-3 h-28 w-28"
+                className="mx-auto mb-3 w-36 max-w-full"
                 style={spriteCellStyle(sheetUrl, sheet, noteSticker.r, noteSticker.c)}
               />
             ) : (

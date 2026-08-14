@@ -109,7 +109,7 @@ export default function MemoryMatch({ onComplete }) {
                 >
                   {showSticker ? (
                     <div
-                      className="h-full w-full"
+                      className="w-full"
                       style={spriteCellStyle(sheetUrl, sheet, sticker.r, sticker.c)}
                     />
                   ) : (
