@@ -58,8 +58,6 @@ export default function LoveMeter({ onComplete }) {
         onClick={press}
         whileTap={{ scale: 0.9 }}
         className="btn mt-6 text-lg"
-        animate={full ? { scale: [1, 1.06, 1] } : {}}
-        transition={full ? { repeat: Infinity, duration: 1 } : {}}
       >
         {full ? 'It overflowed! continue 💖' : 'How much do you love me? 💞'}
       </motion.button>

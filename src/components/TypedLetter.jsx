@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
 // A glass letter card that "writes" its body out character-by-character.
-// Reduced-motion users (and re-opens) get the full text instantly.
-export default function TypedLetter({ title, date, body, signoff, footer, start = true }) {
+// Every featured, archived, and future letter is rendered through this component.
+// Reduced-motion users get the full text instantly.
+export default function TypedLetter({ letter, footer, start = true }) {
+  const { title, date, body, signoff } = letter
   const reduce = useReducedMotion()
   const [typed, setTyped] = useState('')
 
@@ -42,14 +44,9 @@ export default function TypedLetter({ title, date, body, signoff, footer, start 
       <div className="mt-4 space-y-4 whitespace-pre-line text-lg leading-relaxed text-[#6b4560]">
         {typed}
         {!reduce && typed.length < body.length && (
-          <motion.span
-            aria-hidden
-            className="ml-0.5 inline-block"
-            animate={{ opacity: [1, 0] }}
-            transition={{ repeat: Infinity, duration: 0.6 }}
-          >
+          <span aria-hidden className="ml-0.5 inline-block">
             ▍
-          </motion.span>
+          </span>
         )}
       </div>
       <p className="mt-6 font-script text-2xl text-rose">{signoff}</p>

@@ -45,13 +45,9 @@ export default function RiddleGate() {
         transition={{ type: 'spring', stiffness: 120, damping: 16 }}
         className="glass w-full max-w-lg rounded-[2rem] p-8 text-center shadow-soft sm:p-10"
       >
-        <motion.div
-          className="mx-auto mb-4 text-6xl"
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ repeat: Infinity, duration: 1.8 }}
-        >
+        <div className="mx-auto mb-4 text-6xl">
           💌
-        </motion.div>
+        </div>
 
         <p className="font-sans text-sm font-semibold uppercase tracking-widest text-rose/70">
           {site.title}

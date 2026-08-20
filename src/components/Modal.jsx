@@ -5,15 +5,50 @@ import { AnimatePresence, motion } from 'framer-motion'
 export default function Modal({ open, onClose, children, wide = false }) {
   const panelRef = useRef(null)
 
-  // Close on Escape and pull focus into the dialog when it opens.
+  // Keep keyboard focus inside the dialog and return it to the opener on close.
   useEffect(() => {
     if (!open) return
+    const previouslyFocused = document.activeElement
     panelRef.current?.focus()
+
     const onKey = (e) => {
-      if (e.key === 'Escape' && onClose) onClose()
+      if (e.key === 'Escape' && onClose) {
+        e.preventDefault()
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab') return
+
+      const focusable = panelRef.current?.querySelectorAll(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusable?.length) {
+        e.preventDefault()
+        panelRef.current?.focus()
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (
+        e.shiftKey &&
+        (document.activeElement === first || document.activeElement === panelRef.current)
+      ) {
+        e.preventDefault()
+        last.focus()
+      } else if (
+        !e.shiftKey &&
+        (document.activeElement === last || !panelRef.current.contains(document.activeElement))
+      ) {
+        e.preventDefault()
+        first.focus()
+      }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      previouslyFocused?.focus?.()
+    }
   }, [open, onClose])
 
   return (
@@ -33,6 +68,7 @@ export default function Modal({ open, onClose, children, wide = false }) {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
+            aria-label="Dialog"
             tabIndex={-1}
             className={`glass relative w-full ${
               wide ? 'max-w-2xl' : 'max-w-md'
@@ -46,7 +82,7 @@ export default function Modal({ open, onClose, children, wide = false }) {
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-white/70 text-rose transition hover:scale-110"
+                className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full bg-white/70 text-rose transition hover:scale-105"
               >
                 ✕
               </button>

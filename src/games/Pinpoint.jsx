@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
@@ -29,24 +29,29 @@ export default function Pinpoint({ onComplete }) {
     if (i === r.answer) {
       play('pop')
       setSolved(true)
-      const last = round + 1 >= rounds.length
-      setTimeout(() => {
-        if (last) {
-          play('win')
-          setTimeout(() => onComplete(), 500)
-        } else {
-          setRound((n) => n + 1)
-          setRevealed(1)
-          setWrong([])
-          setSolved(false)
-        }
-      }, 1100)
     } else {
       play('error')
       setWrong((w) => [...w, i])
       setRevealed((n) => Math.min(n + 1, r.clues.length))
     }
   }
+
+  useEffect(() => {
+    if (!solved) return
+    const last = round + 1 >= rounds.length
+    const timer = setTimeout(() => {
+      if (last) {
+        play('win')
+        onComplete()
+      } else {
+        setRound((n) => n + 1)
+        setRevealed(1)
+        setWrong([])
+        setSolved(false)
+      }
+    }, last ? 1600 : 1100)
+    return () => clearTimeout(timer)
+  }, [onComplete, play, round, rounds.length, solved])
 
   return (
     <div className="text-center">

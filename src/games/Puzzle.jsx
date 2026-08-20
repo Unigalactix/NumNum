@@ -125,12 +125,17 @@ export default function Puzzle({ onComplete }) {
           if (isBlank && !won) return <div key={idx} />
           const tr = Math.floor(tile / SIZE)
           const tc = tile % SIZE
+          const canMove = neighbors(blank).includes(idx)
           return (
             <motion.button
               key={idx}
               layout
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               onClick={() => move(idx)}
+              disabled={won || !canMove}
+              aria-label={`Tile ${tile + 1}, row ${Math.floor(idx / SIZE) + 1}, column ${
+                (idx % SIZE) + 1
+              }${canMove ? ', move into empty space' : ''}`}
               className={`grid place-items-center overflow-hidden text-xl font-bold text-white shadow ${
                 won ? 'rounded-none shadow-none' : 'rounded-xl'
               } ${

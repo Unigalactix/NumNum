@@ -7,7 +7,6 @@ import Confetti from './Confetti'
 import TypedLetter from './TypedLetter'
 
 // The Love Letter (finale): an envelope that opens to the latest letter.
-// Right now it's awaiting a new one — past letters live in Previous Letters.
 export default function FinaleLetter({ onClose, onOpenPrevious }) {
   const play = useSound()
   const { finale, her } = content
@@ -31,8 +30,7 @@ export default function FinaleLetter({ onClose, onOpenPrevious }) {
             key="env"
             onClick={openIt}
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }}
-            transition={{ y: { repeat: Infinity, duration: 2 } }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.6 }}
             className="group relative"
           >
@@ -45,10 +43,7 @@ export default function FinaleLetter({ onClose, onOpenPrevious }) {
         ) : (
           <motion.div key="letter" className="flex w-full flex-col items-center">
             <TypedLetter
-              title={finale.title}
-              date={finale.date}
-              body={finale.body}
-              signoff={finale.signoff}
+              letter={finale}
               footer={`— always yours, for ${her.nickname} 💞`}
             />
             <div className="mt-6 flex flex-wrap justify-center gap-3">

@@ -83,6 +83,15 @@ export default function MemoryMatch({ onComplete }) {
             <button
               key={card.id}
               onClick={() => flip(idx)}
+              disabled={lock || matched.includes(card.id)}
+              aria-pressed={isUp}
+              aria-label={
+                matched.includes(card.id)
+                  ? `Card ${idx + 1}, matching symbol ${card.key + 1}, matched`
+                  : isUp
+                    ? `Card ${idx + 1}, matching symbol ${card.key + 1}, revealed`
+                    : `Card ${idx + 1}, face down`
+              }
               className="relative aspect-square"
               style={{ perspective: 600 }}
             >

@@ -78,6 +78,13 @@ export default function ScratchCard({ onComplete }) {
     }
   }
 
+  const reveal = () => {
+    if (revealed) return
+    setRevealed(true)
+    play('win')
+    canvasRef.current?.getContext('2d')?.clearRect(0, 0, 360, 224)
+  }
+
   const checkCleared = () => {
     if (revealed) return
     const canvas = canvasRef.current
@@ -89,12 +96,15 @@ export default function ScratchCard({ onComplete }) {
     }
     const ratio = clear / (data.length / 40)
     if (ratio > 0.55) {
-      setRevealed(true)
-      play('win')
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      setTimeout(() => onComplete(), 900)
+      reveal()
     }
   }
+
+  useEffect(() => {
+    if (!revealed) return
+    const timer = setTimeout(() => onComplete(), 900)
+    return () => clearTimeout(timer)
+  }, [onComplete, revealed])
 
   return (
     <div className="text-center">
@@ -111,6 +121,7 @@ export default function ScratchCard({ onComplete }) {
         {!revealed && (
           <canvas
             ref={canvasRef}
+            aria-hidden="true"
             width={360}
             height={224}
             className="absolute inset-0 h-full w-full cursor-grab touch-none active:cursor-grabbing"
@@ -124,6 +135,11 @@ export default function ScratchCard({ onComplete }) {
           />
         )}
       </div>
+      {!revealed && (
+        <button type="button" onClick={reveal} className="btn-ghost mt-4">
+          reveal without scratching
+        </button>
+      )}
     </div>
   )
 }

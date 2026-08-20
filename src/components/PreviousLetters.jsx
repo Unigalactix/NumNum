@@ -66,10 +66,7 @@ export default function PreviousLetters({ onClose }) {
         ) : (
           <motion.div key="open" {...pageTransition} className="mt-8 flex flex-col items-center">
             <TypedLetter
-              title={letters[openIdx].title}
-              date={letters[openIdx].date}
-              body={letters[openIdx].body}
-              signoff={letters[openIdx].signoff}
+              letter={letters[openIdx]}
               footer={`— always yours, for ${her.nickname} 💞`}
             />
             <button

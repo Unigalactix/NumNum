@@ -128,6 +128,11 @@ export default function Tango({ onComplete }) {
                   key={`${r}-${c}`}
                   whileTap={locked || solved ? undefined : tap}
                   onClick={() => cycle(r, c)}
+                  disabled={locked || solved}
+                  aria-invalid={isBad || undefined}
+                  aria-label={`Row ${r + 1}, column ${c + 1}, ${
+                    v === null ? 'empty' : v === HEART ? 'heart' : 'star'
+                  }${locked ? ', locked clue' : ', activate to cycle'}`}
                   className={`grid aspect-square place-items-center rounded-xl text-xl sm:text-2xl transition ${
                     locked
                       ? 'bg-gradient-to-br from-petal/70 to-periwinkle/70 shadow-inner'

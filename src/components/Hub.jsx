@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { content } from '../content'
-import { useStore, GAME_IDS } from '../store'
+import { DAILY_GAME_COUNT, useStore } from '../store'
 import { useSound } from '../hooks/useSound'
 import TiltCard from './TiltCard'
 import { tap } from '../lib/motion'
@@ -21,14 +21,27 @@ const BONUS = [
   { id: 'zip', emoji: '🧵', title: 'Zip', desc: 'One path, 1→ 6', hover: 'trace it all 💞' },
   { id: 'wend', emoji: '🔤', title: 'Wend', desc: 'Trace hidden words', hover: 'find our words 💌' },
   { id: 'patches', emoji: '🎨', title: 'Patches', desc: 'Color the regions', hover: 'no matching neighbors 🌈' },
+  { id: 'arrowtrail', emoji: '↪️', title: 'Arrow Trail', desc: 'Turn every arrow', hover: 'find the path to me 💗' },
+  { id: 'sweetmatch', emoji: '🍬', title: 'Sweet Match', desc: 'Match the treats', hover: 'three is extra sweet 🍭' },
+  { id: 'pocketblocks', emoji: '🧱', title: 'Pocket Blocks', desc: 'Clear three lines', hover: 'make it all fit 💫' },
+  { id: 'duckhunt', emoji: '🦆', title: 'Mini Duck Hunt', desc: 'Tap ten flying ducks', hover: 'quick, there goes one! 💨' },
 ]
 
-export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLetters }) {
+const ALL_GAMES = [...GAMES, ...BONUS]
+
+export default function Hub({
+  onOpenGame,
+  onOpenFinale,
+  onOpenStickers,
+  onOpenLetters,
+  onOpenHistory,
+}) {
   const play = useSound()
   const [lockHint, setLockHint] = useState(false)
   const completed = useStore((s) => s.completed)
-  const doneCount = GAME_IDS.filter((id) => completed[id]).length
-  const allDone = doneCount === GAME_IDS.length
+  const challengeIds = useStore((s) => s.challengeIds)
+  const doneCount = challengeIds.filter((id) => completed[id]).length
+  const allDone = doneCount === DAILY_GAME_COUNT
   // The Love Letter opens when it's awaiting a new letter, or once all games are done.
   const finaleReady = allDone || !!content.finale.awaiting
 
@@ -46,7 +59,7 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLe
 
         {/* progress hearts */}
         <div className="mt-4 flex items-center justify-center gap-1.5">
-          {GAME_IDS.map((id) => (
+          {challengeIds.map((id) => (
             <motion.span
               key={id}
               animate={{ scale: completed[id] ? [1, 1.4, 1] : 1 }}
@@ -57,7 +70,7 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLe
           ))}
         </div>
         <p className="mt-1 text-sm font-semibold text-rose/70">
-          {doneCount} / {GAME_IDS.length} unlocked
+          {doneCount} / {DAILY_GAME_COUNT} of today’s games unlocked
         </p>
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
@@ -81,12 +94,68 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLe
           >
             💌 Previous Letters
           </motion.button>
+          <motion.button
+            whileTap={tap}
+            onClick={() => {
+              play('click')
+              onOpenHistory()
+            }}
+            className="btn-ghost"
+          >
+            🗓️ History of Us
+          </motion.button>
         </div>
       </motion.header>
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {GAMES.map((g, i) => {
+      {/* The letter stays above the full game collection. */}
+      <motion.button
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={finaleReady ? { y: -4 } : {}}
+        whileTap={tap}
+        onClick={() => {
+          if (!finaleReady) {
+            play('error')
+            setLockHint(true)
+            setTimeout(() => setLockHint(false), 2200)
+            return
+          }
+          play('unlock')
+          onOpenFinale()
+        }}
+        className={`gradient-ring mt-10 w-full overflow-hidden rounded-3xl p-6 text-center sm:p-8 ${
+          finaleReady
+            ? 'bg-gradient-to-br from-rose to-periwinkle text-white'
+            : 'glass'
+        }`}
+      >
+        <div className="text-6xl">{finaleReady ? '💌' : '🔒'}</div>
+        <h2 className={`mt-3 text-2xl font-bold ${finaleReady ? 'text-white' : 'text-[#6b4560]'}`}>
+          The Love Letter
+        </h2>
+        <p className={`mx-auto mt-1 max-w-xl text-sm sm:text-base ${finaleReady ? 'text-white/90' : 'text-[#7a5570]'}`}>
+          {finaleReady
+            ? content.finale.awaiting
+              ? 'No new letter yet — peek inside 💌'
+              : 'You found all 5 keys. Your new letter is ready to open 💗'
+            : 'Complete the 5 games marked 🔑 required below to open your new letter.'}
+        </p>
+        {!finaleReady && (
+          <span className="mt-3 inline-flex rounded-full bg-white/70 px-4 py-1.5 text-xs font-bold text-rose">
+            {doneCount} / {DAILY_GAME_COUNT} required games complete
+          </span>
+        )}
+        {finaleReady && (
+          <span className="absolute right-5 top-5">
+            ✨
+          </span>
+        )}
+      </motion.button>
+
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {ALL_GAMES.map((g, i) => {
           const isDone = !!completed[g.id]
+          const isRequired = challengeIds.includes(g.id)
           return (
             <motion.div
               key={g.id}
@@ -101,7 +170,9 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLe
                   play('click')
                   onOpenGame(g.id)
                 }}
-                className="glass group relative block w-full overflow-hidden rounded-3xl p-6 text-left"
+                className={`glass group relative block w-full overflow-hidden rounded-3xl p-6 text-left ${
+                  isRequired ? 'gradient-ring' : ''
+                }`}
               >
                 <div className="text-5xl">{g.emoji}</div>
                 <h3 className="mt-3 text-xl font-bold text-[#6b4560]">{g.title}</h3>
@@ -115,128 +186,19 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLe
                 </p>
                 <span
                   className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold ${
-                    isDone ? 'bg-mint/60 text-emerald-700' : 'bg-white/70 text-rose'
+                    isDone
+                      ? 'bg-mint/60 text-emerald-700'
+                      : isRequired
+                        ? 'bg-petal/90 text-rose'
+                        : 'bg-white/70 text-rose'
                   }`}
                 >
-                  {isDone ? 'done 💗' : 'play'}
+                  {isDone ? 'done 💗' : isRequired ? '🔑 required' : 'play'}
                 </span>
               </TiltCard>
             </motion.div>
           )
         })}
-
-        {/* finale card */}
-        <motion.button
-          initial={{ opacity: 0, y: 24 }}
-          animate={
-            finaleReady
-              ? {
-                  opacity: 1,
-                  y: 0,
-                  boxShadow: [
-                    '0 0 0 0 rgba(255,143,177,0.0)',
-                    '0 0 0 10px rgba(255,143,177,0.25)',
-                    '0 0 0 0 rgba(255,143,177,0.0)',
-                  ],
-                }
-              : { opacity: 1, y: 0 }
-          }
-          transition={
-            finaleReady
-              ? { delay: GAMES.length * 0.08, boxShadow: { repeat: Infinity, duration: 1.8 } }
-              : { delay: GAMES.length * 0.08 }
-          }
-          whileHover={finaleReady ? { y: -6 } : {}}
-          whileTap={tap}
-          onClick={() => {
-            if (!finaleReady) {
-              play('error')
-              setLockHint(true)
-              setTimeout(() => setLockHint(false), 2200)
-              return
-            }
-            play('unlock')
-            onOpenFinale()
-          }}
-          className={`gradient-ring relative overflow-hidden rounded-3xl p-6 text-left ${
-            finaleReady
-              ? 'bg-gradient-to-br from-rose to-periwinkle text-white'
-              : 'glass'
-          }`}
-        >
-          <div className="text-5xl">{finaleReady ? '💌' : '🔒'}</div>
-          <h3 className={`mt-3 text-xl font-bold ${finaleReady ? 'text-white' : 'text-[#6b4560]'}`}>
-            The Love Letter
-          </h3>
-          <p className={`text-sm ${finaleReady ? 'text-white/90' : 'text-[#7a5570]'}`}>
-            {finaleReady
-              ? content.finale.awaiting
-                ? 'No new letter yet — peek inside 💌'
-                : 'It’s ready — open it 💗'
-              : 'Finish all 5 to unlock'}
-          </p>
-          {finaleReady && (
-            <motion.span
-              className="absolute right-4 top-4"
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ repeat: Infinity, duration: 1.2 }}
-            >
-              ✨
-            </motion.span>
-          )}
-        </motion.button>
-      </div>
-
-      {/* bonus games — just for fun, not required for the finale */}
-      <div className="mt-14">
-        <div className="text-center">
-          <h2 className="gradient-text font-script text-3xl sm:text-4xl">Bonus Games</h2>
-          <p className="mt-1 text-sm text-[#6a4360]">
-            little LinkedIn-style puzzles — just for fun 💫
-          </p>
-        </div>
-
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          {BONUS.map((g, i) => {
-            const isDone = !!completed[g.id]
-            return (
-              <motion.div
-                key={g.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                whileHover={{ y: -6 }}
-              >
-                <TiltCard
-                  whileTap={tap}
-                  onClick={() => {
-                    play('click')
-                    onOpenGame(g.id)
-                  }}
-                  className="glass group relative block w-full overflow-hidden rounded-3xl p-6 text-left"
-                >
-                  <div className="text-5xl">{g.emoji}</div>
-                  <h3 className="mt-3 text-xl font-bold text-[#6b4560]">{g.title}</h3>
-                  <p className="text-sm text-[#7a5570]">
-                    <span className="transition-opacity duration-200 group-hover:opacity-0">
-                      {g.desc}
-                    </span>
-                    <span className="absolute left-6 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      {g.hover}
-                    </span>
-                  </p>
-                  <span
-                    className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold ${
-                      isDone ? 'bg-mint/60 text-emerald-700' : 'bg-white/70 text-rose'
-                    }`}
-                  >
-                    {isDone ? 'done 💗' : 'play'}
-                  </span>
-                </TiltCard>
-              </motion.div>
-            )
-          })}
-        </div>
       </div>
 
       <AnimatePresence>
@@ -248,7 +210,7 @@ export default function Hub({ onOpenGame, onOpenFinale, onOpenStickers, onOpenLe
             exit={{ opacity: 0, y: 20 }}
             className="glass fixed bottom-16 left-1/2 z-40 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-[#6b4560] shadow-soft"
           >
-            Finish all 5 games to unlock the letter 💗
+            Finish today’s 5 required games to unlock the letter 💗
           </motion.div>
         )}
       </AnimatePresence>

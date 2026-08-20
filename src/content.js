@@ -209,6 +209,59 @@ export const content = {
     words: ['LOVE', 'KISS', 'HUG', 'CUTE', 'BOBA', 'SMILE', 'NEHA', 'FOREVER'],
   },
 
+  // The dates that shaped our story, shown in the History of Us timeline.
+  history: [
+    {
+      date: 'Apr 3rd',
+      emoji: '💞',
+      title: 'We matched on Hinge',
+      since: '2026-04-03',
+      countLabel: 'since we matched',
+    },
+    { date: 'May 15th', emoji: '🎓', title: 'You graduated from USC' },
+    {
+      date: 'May 16th',
+      emoji: '😁',
+      title: 'Someone proposed to someone',
+      detail: 'Hint: one someone is you, and the other is me.',
+      since: '2026-05-16',
+      countLabel: 'since the proposal',
+    },
+    { date: 'May 17th', emoji: '📱', title: 'Our first video call on WhatsApp' },
+    {
+      date: 'July 15th',
+      emoji: '🍽️',
+      title: 'We met in person and shared our first meal',
+      since: '2026-07-15',
+      countLabel: 'since we first met',
+    },
+    {
+      date: 'Aug 3rd',
+      emoji: '😘',
+      title: 'Your first day at Amazon',
+      detail: 'We walked to the office together.',
+    },
+    {
+      date: 'Aug 7th',
+      emoji: '🍌',
+      title: 'Our first visit to the Amazon Spheres and Banana Stand',
+    },
+    {
+      date: 'Aug 8th',
+      emoji: '🧖‍♀️',
+      title: 'Face masks as a couple and the Rahul Subramanian show',
+    },
+    { date: 'Aug 15th', emoji: '⛵', title: 'Our first boat ride' },
+    {
+      date: 'Aug 16th & 17th',
+      emoji: '🎂',
+      title: 'You celebrated my birthday',
+      detail: 'With a Minion sticker on a pineapple-flavor eggless cake.',
+      since: '2026-08-16',
+      countLabel: 'since my birthday celebration',
+    },
+  ],
+
   // Short sweet notes revealed after each mini-game
   notes: {
     memory: {
@@ -255,9 +308,25 @@ export const content = {
       title: 'You colored us in 🎨',
       body: 'Every little patch in its own happy color — you make my whole world brighter, my love.',
     },
+    arrowtrail: {
+      title: 'Every arrow found you ↪️',
+      body: 'No matter how the path twists and turns, every little direction still leads me back to you.',
+    },
+    sweetmatch: {
+      title: 'The sweetest match 🍬',
+      body: 'Of all the possible matches in the whole wide world, I still can’t believe I got the sweetest one.',
+    },
+    pocketblocks: {
+      title: 'We fit perfectly 🧱',
+      body: 'Somehow all our odd little edges fit together into something steady, bright, and completely ours.',
+    },
+    duckhunt: {
+      title: 'You caught every moment 🦆',
+      body: 'The best moments can fly by so quickly — I love that we keep finding and holding onto ours.',
+    },
   },
 
-  // Past love letters — kept safe here; each opens with the same envelope + typing.
+  // Past love letters — every current and future entry uses the shared typing animation.
   // To add a new letter, drop an object at the TOP of this list and set `date`
   // to the moment you wrote it, e.g. 'August 12, 2026 · 10:30 AM'.
   previousLetters: [
@@ -271,15 +340,18 @@ even when we have our odds, we have a cute way of blending them — a cute way o
     },
   ],
 
-  // The Love Letter (finale) — currently awaiting the next one to be written.
-  // `awaiting: true` means there's no new letter, so the finale opens freely
-  // (no need to finish the games). Set it to false when a real letter is added.
+  // The Love Letter (finale). Change `version` whenever a new letter is added;
+  // this resets progress and creates a fresh set of five required games.
   finale: {
-    awaiting: true,
-    title: 'Awaiting a new letter…',
-    body: `no new letter waiting just yet, my love — but there’s always another one on the way. 💌
+    version: '2026-08-20T11:13',
+    awaiting: false,
+    date: 'August 20, 2026 · 11:13 AM',
+    title: 'Thank You, My Num Num 💗',
+    body: `thank you for making me feel comfortable when i was at my lowest. thank you for taking care of me when i was at my worst. thank you for making my 27th birthday so memorable, for the gifts, and for all the time you’ve given me. 🥹🎂🎁
 
-until then, every letter i’ve written you is kept safe in “Previous Letters.” reread them whenever you miss my words. 💗`,
-    signoff: 'yours, always. 💗',
+i’m sorry for hurting your feelings and for not making you feel safe in this relationship. i promise to be a better boyfriend. i’ll try to be more honest and truthful with you, always. 🤍🫂
+
+i love you, yaar. please be my pandhi forever. 🐷💞`,
+    signoff: 'yours, trying to be better every day. i love you. 💗',
   },
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
@@ -9,6 +9,7 @@ export default function Quiz({ onComplete }) {
   const [step, setStep] = useState(0)
   const [picked, setPicked] = useState(null)
   const [score, setScore] = useState(0)
+  const [finished, setFinished] = useState(false)
 
   const q = questions[step]
 
@@ -22,22 +23,33 @@ export default function Quiz({ onComplete }) {
     } else {
       play('error')
     }
-    setTimeout(() => {
+  }
+
+  useEffect(() => {
+    if (picked === null) return
+    const timer = setTimeout(() => {
       if (step + 1 < questions.length) {
         setStep((s) => s + 1)
         setPicked(null)
       } else {
         play('win')
-        setTimeout(() => onComplete(), 500)
+        setFinished(true)
       }
     }, 1100)
-  }
+    return () => clearTimeout(timer)
+  }, [picked, play, questions.length, step])
+
+  useEffect(() => {
+    if (!finished) return
+    const timer = setTimeout(() => onComplete(), 1100)
+    return () => clearTimeout(timer)
+  }, [finished, onComplete])
 
   return (
     <div className="text-center">
       <h2 className="gradient-text font-script text-3xl">How Well Do You Know Us?</h2>
       <p className="mt-1 text-sm font-semibold text-rose/70">
-        Question {step + 1} of {questions.length}
+        Question {step + 1} of {questions.length} · Score {score}
       </p>
 
       <div className="mx-auto mt-3 h-2 w-full max-w-md overflow-hidden rounded-full bg-white/60">
@@ -80,6 +92,15 @@ export default function Quiz({ onComplete }) {
               )
             })}
           </div>
+          <p className="mt-4 min-h-6 font-semibold text-rose" aria-live="polite">
+            {finished
+              ? `You got ${score} out of ${questions.length} 💗`
+              : picked === null
+                ? ''
+                : picked === q.answer
+                  ? 'That’s right 💚'
+                  : `The answer was ${q.options[q.answer]} 💞`}
+          </p>
         </motion.div>
       </AnimatePresence>
     </div>

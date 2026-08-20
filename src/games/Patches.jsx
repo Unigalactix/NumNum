@@ -16,6 +16,7 @@ const COLS = REGIONS[0].length
 
 // pastel palette (rose, periwinkle, mint, peach)
 const PALETTE = ['#ff9fb5', '#b8c0ff', '#bde8c8', '#ffd6a5']
+const COLOR_NAMES = ['rose', 'periwinkle', 'mint', 'peach']
 
 const REGION_IDS = [...new Set(REGIONS.flat())]
 
@@ -94,11 +95,23 @@ export default function Patches({ onComplete }) {
             row.map((id, c) => {
               const idx = colors[id]
               const isBad = conflicts.has(id)
+              const firstCell = REGIONS.flat().indexOf(id) === r * COLS + c
               return (
                 <motion.button
                   key={`${r}-${c}`}
                   whileTap={solved ? undefined : tap}
                   onClick={() => cycle(id)}
+                  disabled={solved}
+                  tabIndex={firstCell ? 0 : -1}
+                  aria-hidden={!firstCell}
+                  aria-invalid={firstCell && isBad ? true : undefined}
+                  aria-label={
+                    firstCell
+                      ? `Patch ${id}, ${idx == null ? 'uncolored' : COLOR_NAMES[idx]}${
+                          isBad ? ', conflicts with a touching patch' : ''
+                        }. Activate to change color.`
+                      : undefined
+                  }
                   className="aspect-square"
                   style={{
                     background: idx == null ? 'rgba(255,255,255,0.85)' : PALETTE[idx],

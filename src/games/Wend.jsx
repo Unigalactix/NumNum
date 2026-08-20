@@ -64,13 +64,18 @@ export default function Wend({ onComplete }) {
   const play = useSound()
   const words = content.wend.words
 
-  const grid = useMemo(() => generate(words) || generate(words.slice(0, 5)), [words])
+  const { grid, activeWords } = useMemo(() => {
+    const fullGrid = generate(words)
+    if (fullGrid) return { grid: fullGrid, activeWords: words }
+    const fallbackWords = words.slice(0, 5)
+    return { grid: generate(fallbackWords), activeWords: fallbackWords }
+  }, [words])
   const [anchor, setAnchor] = useState(null)
   const [found, setFound] = useState([]) // list of found words
   const [foundCells, setFoundCells] = useState(new Set())
 
   const key = (r, c) => `${r},${c}`
-  const remaining = words.filter((w) => !found.includes(w))
+  const remaining = activeWords.filter((w) => !found.includes(w))
   const solved = remaining.length === 0
 
   const clickCell = (r, c) => {
@@ -89,7 +94,7 @@ export default function Wend({ onComplete }) {
     if (!cells) { play('error'); return }
     const str = cells.map(([rr, cc]) => grid[rr][cc]).join('')
     const rev = [...str].reverse().join('')
-    const match = words.find((w) => (w === str || w === rev) && !found.includes(w))
+    const match = activeWords.find((w) => (w === str || w === rev) && !found.includes(w))
     if (match) {
       play('pop')
       setFound((f) => [...f, match])
@@ -130,6 +135,11 @@ export default function Wend({ onComplete }) {
                   key={key(r, c)}
                   whileTap={solved ? undefined : tap}
                   onClick={() => clickCell(r, c)}
+                  disabled={solved}
+                  aria-pressed={!!isAnchor}
+                  aria-label={`Row ${r + 1}, column ${c + 1}, letter ${ch}${
+                    isFound ? ', part of a found word' : isAnchor ? ', selected as start' : ''
+                  }`}
                   className={`grid aspect-square place-items-center rounded-lg text-xs font-bold uppercase transition sm:text-sm ${
                     isFound
                       ? 'bg-gradient-to-br from-petal to-periwinkle text-white'
@@ -147,7 +157,7 @@ export default function Wend({ onComplete }) {
       </div>
 
       <div className="mx-auto mt-5 flex max-w-md flex-wrap items-center justify-center gap-2">
-        {words.map((w) => {
+        {activeWords.map((w) => {
           const isFound = found.includes(w)
           return (
             <span
@@ -165,7 +175,7 @@ export default function Wend({ onComplete }) {
       </div>
 
       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-rose/60">
-        {solved ? 'you found them all 💗' : `${found.length} / ${words.length} found`}
+        {solved ? 'you found them all 💗' : `${found.length} / ${activeWords.length} found`}
       </p>
     </div>
   )

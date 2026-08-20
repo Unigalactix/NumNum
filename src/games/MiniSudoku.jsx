@@ -108,6 +108,12 @@ export default function MiniSudoku({ onComplete }) {
                       <button
                         key={`${r}-${c}`}
                         onClick={() => select(r, c)}
+                        disabled={locked || solved}
+                        aria-pressed={!!isSel}
+                        aria-invalid={isBad || undefined}
+                        aria-label={`Row ${r + 1}, column ${c + 1}, ${v ?? 'empty'}, ${
+                          locked ? 'locked clue' : 'editable cell'
+                        }`}
                         className={`grid aspect-square place-items-center rounded-lg text-lg font-bold transition sm:text-xl ${
                           locked
                             ? 'bg-gradient-to-br from-petal/60 to-periwinkle/60 text-[#5a3a55]'
@@ -135,6 +141,7 @@ export default function MiniSudoku({ onComplete }) {
             whileTap={tap}
             onClick={() => setValue(n)}
             disabled={!sel || solved}
+            aria-label={`Enter ${n} in selected cell`}
             className="grid h-11 w-11 place-items-center rounded-xl bg-white/80 text-lg font-bold text-[#6b4560] shadow-soft transition hover:bg-white disabled:opacity-40"
           >
             {n}

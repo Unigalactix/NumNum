@@ -93,11 +93,17 @@ export default function Zip({ onComplete }) {
             const isHead = path[path.length - 1] === i
             const num = NUMBERS[i]
             const startHint = path.length === 0 && num === 1
+            const [row, column] = rc(i)
             return (
               <motion.button
                 key={i}
                 whileTap={solved ? undefined : tap}
                 onClick={() => handle(i)}
+                disabled={solved}
+                aria-pressed={visited.has(i)}
+                aria-label={`Row ${row + 1}, column ${column + 1}${
+                  num ? `, checkpoint ${num}` : ''
+                }${isHead ? ', current path end' : visited.has(i) ? ', visited' : ', unvisited'}`}
                 className={`relative grid aspect-square place-items-center rounded-xl transition ${
                   visited.has(i)
                     ? 'bg-gradient-to-br from-petal/80 to-periwinkle/80'

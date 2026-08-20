@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { content } from './content'
-import { useStore } from './store'
-import { useSound } from './hooks/useSound'
+import { DAY_MS, useStore } from './store'
 import { useStickerSheet } from './hooks/useStickerSheet'
-import { useAmbientMusic } from './hooks/useAmbientMusic'
 import { spriteCellStyle } from './lib/sprite'
 import { pageTransition, spring, tap } from './lib/motion'
 
@@ -16,6 +14,7 @@ import Hub from './components/Hub'
 import FinaleLetter from './components/FinaleLetter'
 import StickerBook from './components/StickerBook'
 import PreviousLetters from './components/PreviousLetters'
+import HistoryOfUs from './components/HistoryOfUs'
 
 import RiddleGate from './games/RiddleGate'
 import MemoryMatch from './games/MemoryMatch'
@@ -29,6 +28,10 @@ import MiniSudoku from './games/MiniSudoku'
 import Zip from './games/Zip'
 import Wend from './games/Wend'
 import Patches from './games/Patches'
+import ArrowTrail from './games/ArrowTrail'
+import SweetMatch from './games/SweetMatch'
+import PocketBlocks from './games/PocketBlocks'
+import DuckHunt from './games/DuckHunt'
 
 const GAME_COMPONENTS = {
   memory: MemoryMatch,
@@ -42,21 +45,21 @@ const GAME_COMPONENTS = {
   zip: Zip,
   wend: Wend,
   patches: Patches,
+  arrowtrail: ArrowTrail,
+  sweetmatch: SweetMatch,
+  pocketblocks: PocketBlocks,
+  duckhunt: DuckHunt,
 }
 
 export default function App() {
   const entered = useStore((s) => s.entered)
-  const muted = useStore((s) => s.muted)
-  const toggleMute = useStore((s) => s.toggleMute)
-  const musicOn = useStore((s) => s.musicOn)
-  const toggleMusic = useStore((s) => s.toggleMusic)
   const completeGame = useStore((s) => s.completeGame)
   const completed = useStore((s) => s.completed)
   const reset = useStore((s) => s.reset)
   const view = useStore((s) => s.view)
   const setView = useStore((s) => s.setView)
-  const play = useSound()
-  useAmbientMusic()
+  const cycleStartedAt = useStore((s) => s.cycleStartedAt)
+  const syncCycle = useStore((s) => s.syncCycle)
   const reduce = useReducedMotion()
 
   const [note, setNote] = useState(null) // reward note after a game
@@ -64,8 +67,28 @@ export default function App() {
   const [celebrate, setCelebrate] = useState(false) // confetti burst on a win
   const [askReset, setAskReset] = useState(false) // styled "start over?" confirm
   const [splash, setSplash] = useState(!reduce) // brief intro splash on first load
+  const [cycleReady, setCycleReady] = useState(false)
 
   const { sheet, sheetUrl, sheetOk } = useStickerSheet()
+
+  // A new featured letter or a completed 24-hour cycle starts the site fresh.
+  useEffect(() => {
+    const sync = () => syncCycle(content.finale.version)
+    sync()
+    setCycleReady(true)
+
+    const elapsed = Date.now() - useStore.getState().cycleStartedAt
+    const timeout = setTimeout(sync, Math.max(0, DAY_MS - elapsed) + 100)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') sync()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      clearTimeout(timeout)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [cycleStartedAt, syncCycle])
 
   // Fade the intro splash out shortly after load.
   useEffect(() => {
@@ -74,19 +97,45 @@ export default function App() {
     return () => clearTimeout(id)
   }, [splash])
 
-  // Render every emoji as a Twemoji image so it looks identical on every device.
+  // Parse the initial app once, then only newly rendered subtrees.
   useEffect(() => {
+    const root = document.getElementById('root')
+    if (!root) return
     let tries = 0
-    const parse = () =>
-      window.twemoji
-        ? (window.twemoji.parse(document.body, { folder: 'svg', ext: '.svg' }), true)
-        : false
-    if (parse()) return
-    const id = setInterval(() => {
-      if (parse() || ++tries > 40) clearInterval(id)
-    }, 100)
-    return () => clearInterval(id)
-  }, [view, entered, note, celebrate, splash, askReset])
+    let retryId
+    let observer
+    const parse = (node) => {
+      if (!window.twemoji) return false
+      window.twemoji.parse(node, { folder: 'svg', ext: '.svg' })
+      return true
+    }
+    const start = () => {
+      if (!parse(root)) return false
+      observer = new MutationObserver((records) => {
+        records.forEach((record) => {
+          record.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              if (!node.matches?.('img.emoji, img.twemoji')) parse(node)
+            } else if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+              parse(node.parentElement)
+            }
+          })
+        })
+      })
+      observer.observe(root, { childList: true, subtree: true })
+      return true
+    }
+
+    if (!start()) {
+      retryId = setInterval(() => {
+        if (start() || ++tries > 40) clearInterval(retryId)
+      }, 100)
+    }
+    return () => {
+      clearInterval(retryId)
+      observer?.disconnect()
+    }
+  }, [])
 
   // Preload the puzzle photo at startup so it never "pops in" when the game opens.
   useEffect(() => {
@@ -97,7 +146,11 @@ export default function App() {
   }, [])
 
   const ActiveGame =
-    view !== 'hub' && view !== 'finale' && view !== 'stickers' && view !== 'letters'
+    view !== 'hub' &&
+    view !== 'finale' &&
+    view !== 'stickers' &&
+    view !== 'letters' &&
+    view !== 'history'
       ? GAME_COMPONENTS[view]
       : null
 
@@ -115,9 +168,17 @@ export default function App() {
     setView('hub')
   }
 
+  if (!cycleReady) {
+    return (
+      <div className="grid min-h-screen place-items-center text-6xl" aria-label="Preparing our little world">
+        💗
+      </div>
+    )
+  }
+
   return (
     <div className="relative min-h-screen">
-      <FloatingHearts />
+      <FloatingHearts count={ActiveGame ? 0 : 4} />
       <GrainOverlay />
       {celebrate && <Confetti />}
 
@@ -144,34 +205,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* top controls */}
-      {entered && (
-        <div className="fixed right-4 top-4 z-40 flex gap-2">
-          <motion.button
-            whileTap={tap}
-            onClick={() => {
-              play('click')
-              toggleMusic()
-            }}
-            aria-label={musicOn ? 'Turn music off' : 'Turn music on'}
-            className="grid h-11 w-11 place-items-center rounded-full glass text-xl transition hover:scale-110"
-          >
-            {musicOn ? '🎶' : '🎵'}
-          </motion.button>
-          <motion.button
-            whileTap={tap}
-            onClick={() => {
-              play('click')
-              toggleMute()
-            }}
-            aria-label={muted ? 'Unmute' : 'Mute'}
-            className="grid h-11 w-11 place-items-center rounded-full glass text-xl transition hover:scale-110"
-          >
-            {muted ? '🔇' : '🔊'}
-          </motion.button>
-        </div>
-      )}
-
       <AnimatePresence mode="wait">
         {!entered ? (
           <motion.div key="gate" exit={{ opacity: 0 }}>
@@ -184,8 +217,9 @@ export default function App() {
               onOpenFinale={() => setView('finale')}
               onOpenStickers={() => setView('stickers')}
               onOpenLetters={() => setView('letters')}
+              onOpenHistory={() => setView('history')}
             />
-            <Footer onAskReset={() => setAskReset(true)} play={play} />
+            <Footer onAskReset={() => setAskReset(true)} />
           </motion.div>
         ) : view === 'finale' ? (
           <motion.div key="finale" {...pageTransition}>
@@ -202,6 +236,10 @@ export default function App() {
           <motion.div key="letters" {...pageTransition}>
             <PreviousLetters onClose={() => setView('hub')} />
           </motion.div>
+        ) : view === 'history' ? (
+          <motion.div key="history" {...pageTransition}>
+            <HistoryOfUs onClose={() => setView('hub')} />
+          </motion.div>
         ) : (
           <motion.div
             key={view}
@@ -210,10 +248,7 @@ export default function App() {
           >
             <motion.button
               whileTap={tap}
-              onClick={() => {
-                play('click')
-                setView('hub')
-              }}
+              onClick={() => setView('hub')}
               className="btn-ghost mb-6"
             >
               ← back
@@ -263,7 +298,6 @@ export default function App() {
             </button>
             <button
               onClick={() => {
-                play('click')
                 reset()
                 setAskReset(false)
               }}
@@ -278,14 +312,11 @@ export default function App() {
   )
 }
 
-function Footer({ onAskReset, play }) {
+function Footer({ onAskReset }) {
   return (
     <footer className="pointer-events-none fixed bottom-3 left-0 right-0 z-30 flex justify-center">
       <button
-        onClick={() => {
-          play('click')
-          onAskReset()
-        }}
+        onClick={onAskReset}
         className="pointer-events-auto rounded-full bg-white/50 px-4 py-1.5 text-xs font-semibold text-rose/80 backdrop-blur transition hover:bg-white/80"
       >
         ↺ start over

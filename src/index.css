@@ -21,22 +21,8 @@ body {
   font-family: 'Quicksand', sans-serif;
   color: #5b3a52;
   background: linear-gradient(135deg, #ffe3f1 0%, #ffe9d6 25%, #e9dcff 55%, #d6ecff 80%, #d3f7ee 100%);
-  background-size: 160% 160%;
-  animation: shimmer 40s ease-in-out infinite;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-}
-
-@keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes ringshift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 @keyframes skeleton {
@@ -61,7 +47,7 @@ body {
       inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
 
-  /* soft animated gradient ring for hero cards (gate + finale) */
+  /* soft gradient ring for hero cards (gate + finale) */
   .gradient-ring {
     position: relative;
   }
@@ -72,8 +58,6 @@ body {
     border-radius: inherit;
     padding: 1.5px;
     background: linear-gradient(130deg, #ff8fb1, #c9a0ff, #ffc59a, #ff8fb1);
-    background-size: 260% 260%;
-    animation: ringshift 8s ease infinite;
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
@@ -134,12 +118,8 @@ img.twemoji {
   border-radius: 999px;
 }
 
-/* respect users who prefer less motion: freeze the shimmer + heavy loops */
+/* respect users who prefer less motion */
 @media (prefers-reduced-motion: reduce) {
-  body {
-    animation: none;
-    background-position: 0% 50%;
-  }
   * {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
