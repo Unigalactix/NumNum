@@ -16,6 +16,7 @@ function daysSince(isoDate) {
 export default function HistoryOfUs({ onClose }) {
   const play = useSound()
   const moments = content.history || []
+  const favorites = content.favorites || []
 
   return (
     <div className="mx-auto max-w-3xl px-5 pb-24 pt-16">
@@ -35,6 +36,31 @@ export default function HistoryOfUs({ onClose }) {
         <h2 className="gradient-text mt-2 font-script text-4xl sm:text-5xl">History of Us</h2>
         <p className="mt-2 text-[#7a5570]">the little dates that became our story 💗</p>
       </motion.header>
+
+      {favorites.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mx-auto mt-8 max-w-2xl text-center"
+          aria-labelledby="favorite-things-title"
+        >
+          <h3 id="favorite-things-title" className="font-script text-2xl text-rose">
+            Num Num’s favorite things
+          </h3>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {favorites.map((favorite) => (
+              <span
+                key={favorite.label}
+                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-[#6b4560]"
+              >
+                <span className="text-xl" aria-hidden="true">{favorite.emoji}</span>
+                {favorite.label}
+              </span>
+            ))}
+          </div>
+        </motion.section>
+      )}
 
       <div className="relative mx-auto mt-10 max-w-2xl">
         <div className="absolute bottom-5 left-[1.15rem] top-5 w-0.5 bg-gradient-to-b from-rose via-periwinkle to-mint sm:left-1/2 sm:-translate-x-1/2" />

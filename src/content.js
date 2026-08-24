@@ -80,7 +80,13 @@ export const content = {
   ],
 
   // Memory-match uses these pairs (emoji fallback if no photos)
-  memoryEmojis: ['💖', '🥟', '🌸', '🎀', '🧸', '⭐'],
+  memoryEmojis: ['💖', '🥐', '📺', '🐕', '🎀', '⭐'],
+
+  favorites: [
+    { emoji: '🥐', label: 'Raspberry croissants' },
+    { emoji: '📺', label: 'Shin-chan' },
+    { emoji: '🐕', label: 'Golden retrievers' },
+  ],
 
   // Reasons revealed by the Love Meter game
   reasons: [
@@ -181,13 +187,13 @@ export const content = {
       },
       {
         clues: [
-          'Boba runs 🧋',
-          'Late-night talks 🌙',
-          'Cooking chaos together 🍳',
-          'Cozy reading cuddles 📖',
-          'Absolutely anything — as long as it’s with you',
+          'Raspberry croissants 🥐',
+          'Shin-chan 📺',
+          'Golden retrievers 🐕',
+          'Something flaky, something funny, something furry',
+          'All three make your eyes light up ✨',
         ],
-        options: ['My hobbies', 'Our favorite things to do', 'Chores', 'Errands'],
+        options: ['My shopping list', 'Num Num’s favorite things', 'Date ideas', 'Birthday gifts'],
         answer: 1,
       },
       {
@@ -212,53 +218,81 @@ export const content = {
   // The dates that shaped our story, shown in the History of Us timeline.
   history: [
     {
-      date: 'Apr 3rd',
+      date: 'August 17th, 1999',
+      emoji: '🎂',
+      title: 'Rajesh was born',
+    },
+    {
+      date: 'February 23rd, 2001',
+      emoji: '💗',
+      title: 'Neha, my Num Num, was born',
+    },
+    {
+      date: 'April 3rd, 2026',
       emoji: '💞',
       title: 'We matched on Hinge',
       since: '2026-04-03',
       countLabel: 'since we matched',
     },
-    { date: 'May 15th', emoji: '🎓', title: 'You graduated from USC' },
+    { date: 'May 15th, 2026', emoji: '🎓', title: 'You graduated from USC' },
     {
-      date: 'May 16th',
+      date: 'May 16th, 2026',
       emoji: '😁',
       title: 'Someone proposed to someone',
       detail: 'Hint: one someone is you, and the other is me.',
       since: '2026-05-16',
       countLabel: 'since the proposal',
     },
-    { date: 'May 17th', emoji: '📱', title: 'Our first video call on WhatsApp' },
+    { date: 'May 17th, 2026', emoji: '📱', title: 'Our first video call on WhatsApp' },
     {
-      date: 'July 15th',
+      date: 'July 15th, 2026',
       emoji: '🍽️',
       title: 'We met in person and shared our first meal',
       since: '2026-07-15',
       countLabel: 'since we first met',
     },
     {
-      date: 'Aug 3rd',
+      date: 'August 2nd, 2026',
+      emoji: '🎬',
+      title: 'Our first movie together',
+      detail: 'Spider-Man: Brand New Day.',
+    },
+    {
+      date: 'August 3rd, 2026',
       emoji: '😘',
       title: 'Your first day at Amazon',
       detail: 'We walked to the office together.',
     },
     {
-      date: 'Aug 7th',
+      date: 'August 7th, 2026',
       emoji: '🍌',
       title: 'Our first visit to the Amazon Spheres and Banana Stand',
     },
     {
-      date: 'Aug 8th',
+      date: 'August 8th, 2026',
       emoji: '🧖‍♀️',
       title: 'Face masks as a couple and the Rahul Subramanian show',
     },
-    { date: 'Aug 15th', emoji: '⛵', title: 'Our first boat ride' },
+    { date: 'August 15th, 2026', emoji: '⛵', title: 'Our first boat ride' },
     {
-      date: 'Aug 16th & 17th',
+      date: 'August 16th & 17th, 2026',
       emoji: '🎂',
       title: 'You celebrated my birthday',
       detail: 'With a Minion sticker on a pineapple-flavor eggless cake.',
       since: '2026-08-16',
       countLabel: 'since my birthday celebration',
+    },
+    {
+      date: 'August 22nd, 2026',
+      emoji: '🥐',
+      title: 'A full Seattle date with my Num Num',
+      detail: 'Raspberry croissants at the farmers market, the Gum Wall and Pike Place Market, Cheesecake Factory, and Irumudi.',
+    },
+    {
+      date: 'August 23rd, 2026',
+      emoji: '🐕',
+      title: 'Num Num’s half birthday',
+      detail: 'A little celebration for my favorite girl. 💗',
     },
   ],
 
@@ -331,6 +365,16 @@ export const content = {
   // to the moment you wrote it, e.g. 'August 12, 2026 · 10:30 AM'.
   previousLetters: [
     {
+      date: 'August 20, 2026 · 11:13 AM',
+      title: 'Thank You, My Num Num 💗',
+      body: `thank you for making me feel comfortable when i was at my lowest. thank you for taking care of me when i was at my worst. thank you for making my 27th birthday so memorable, for the gifts, and for all the time you’ve given me. 🥹🎂🎁
+
+i’m sorry for hurting your feelings and for not making you feel safe in this relationship. i promise to be a better boyfriend. i’ll try to be more honest and truthful with you, always. 🤍🫂
+
+i love you, yaar. please be my pandhi forever. 🐷💞`,
+      signoff: 'yours, trying to be better every day. i love you. 💗',
+    },
+    {
       date: 'August 7, 2026 · 10:30 AM',
       title: 'My Love,',
       body: `i never trusted my life to give me another chance to fall in love and take it all in. but when we texted for the first time i knew we had something.
@@ -344,14 +388,9 @@ even when we have our odds, we have a cute way of blending them — a cute way o
   // this resets progress and creates a fresh set of five required games.
   finale: {
     version: '2026-08-20T11:13',
-    awaiting: false,
-    date: 'August 20, 2026 · 11:13 AM',
-    title: 'Thank You, My Num Num 💗',
-    body: `thank you for making me feel comfortable when i was at my lowest. thank you for taking care of me when i was at my worst. thank you for making my 27th birthday so memorable, for the gifts, and for all the time you’ve given me. 🥹🎂🎁
-
-i’m sorry for hurting your feelings and for not making you feel safe in this relationship. i promise to be a better boyfriend. i’ll try to be more honest and truthful with you, always. 🤍🫂
-
-i love you, yaar. please be my pandhi forever. 🐷💞`,
-    signoff: 'yours, trying to be better every day. i love you. 💗',
+    awaiting: true,
+    title: 'Awaiting a new letter…',
+    body: `there isn’t a new letter waiting here just yet — but this little box will always stay open for you. 💌`,
+    signoff: 'come back soon, my Num Num. 💗',
   },
 }
