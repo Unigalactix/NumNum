@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { ArrowRight, Eye, KeyRound, Lightbulb } from 'lucide-react'
 import { content } from '../content'
 import { useStore } from '../store'
 import { useSound } from '../hooks/useSound'
@@ -38,35 +39,49 @@ export default function RiddleGate() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-5">
+    <div className="grid min-h-screen lg:grid-cols-[1fr_minmax(28rem,0.85fr)]">
+      <div className="hidden border-r border-[#e4dde0] p-12 lg:flex lg:flex-col lg:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-lg bg-ink font-display text-xl text-white">N</span>
+          <span className="font-display text-xl text-ink">For My Num Num</span>
+        </div>
+        <div className="max-w-xl">
+          <p className="editorial-label">A private keepsake</p>
+          <p className="mt-5 font-display text-6xl leading-[0.98] text-ink">
+            Every little thing worth remembering.
+          </p>
+          <div className="mt-10 h-px w-24 bg-wine" />
+        </div>
+        <p className="text-sm text-muted">Rajesh & Neha · 2026</p>
+      </div>
+
+      <div className="flex items-center justify-center p-5 sm:p-10">
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 120, damping: 16 }}
-        className="glass w-full max-w-lg rounded-[2rem] p-8 text-center shadow-soft sm:p-10"
+        className="surface w-full max-w-lg rounded-2xl p-7 sm:p-10"
       >
-        <div className="mx-auto mb-4 text-6xl">
-          💌
-        </div>
+        <span className="grid h-11 w-11 place-items-center rounded-lg bg-blush/70 text-wine">
+          <KeyRound size={21} strokeWidth={1.7} aria-hidden="true" />
+        </span>
 
-        <p className="font-sans text-sm font-semibold uppercase tracking-widest text-rose/70">
-          {site.title}
-        </p>
-        <h1 className="gradient-text mt-2 font-script text-4xl sm:text-5xl">
-          Hi {her.nickname} 💗
+        <p className="editorial-label mt-8">Private entry</p>
+        <h1 className="mt-2 font-display text-4xl leading-tight text-ink sm:text-5xl">
+          Welcome, {her.nickname}.
         </h1>
 
         {ok ? (
           <motion.p
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-8 font-script text-2xl text-rose"
+            className="mt-8 border-l-2 border-wine pl-4 font-display text-2xl italic text-wine"
           >
             {gate.success}
           </motion.p>
         ) : (
           <>
-            <p className="mt-5 text-lg leading-relaxed text-[#7a5570]">
+            <p className="mt-5 text-base leading-relaxed text-muted">
               {gate.question}
             </p>
 
@@ -78,14 +93,15 @@ export default function RiddleGate() {
                 placeholder="type your answer…"
                 animate={error ? { x: [0, -10, 10, -8, 8, 0] } : {}}
                 transition={{ duration: 0.5 }}
-                className={`w-full rounded-full border-2 bg-white/80 px-6 py-4 text-center text-lg outline-none transition ${
+                className={`w-full rounded-lg border bg-white px-4 py-3.5 text-left text-base text-ink outline-none transition ${
                   error
                     ? 'border-rose'
-                    : 'border-white focus:border-periwinkle'
+                    : 'border-[#d8ced2] focus:border-wine'
                 }`}
               />
-              <button type="submit" className="btn mt-5 w-full text-lg">
-                Unlock 💕
+              <button type="submit" className="btn mt-4 w-full">
+                Unlock archive
+                <ArrowRight size={17} aria-hidden="true" />
               </button>
             </form>
 
@@ -93,7 +109,7 @@ export default function RiddleGate() {
               <motion.p
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 font-script text-lg text-rose"
+                className="mt-4 text-sm leading-relaxed text-wine"
               >
                 {gate.almost}
               </motion.p>
@@ -104,24 +120,25 @@ export default function RiddleGate() {
                 play('click')
                 setShowHint(true)
               }}
-              className="mt-4 text-sm font-semibold text-periwinkle underline-offset-4 hover:underline"
+              className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-wine"
             >
-              need a hint?
+              <Lightbulb size={16} aria-hidden="true" />
+              Need a hint?
             </button>
 
             {showHint && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 rounded-2xl bg-white/70 p-4"
+                className="mt-5 border-t border-[#e4dde0] pt-5"
               >
-                <p className="font-script text-xl text-rose">
+                <p className="font-display text-xl italic text-ink">
                   Seriously? You were asking for a hint on this question? 😏
                 </p>
-                <p className="mt-1 text-sm text-[#7a5570]">{gate.hint}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{gate.hint}</p>
 
                 {showAnswer ? (
-                  <p className="mt-3 text-base font-semibold text-periwinkle">
+                  <p className="mt-4 text-sm font-semibold text-wine">
                     It's {gate.answer} 🎬💕
                   </p>
                 ) : (
@@ -132,7 +149,8 @@ export default function RiddleGate() {
                     }}
                     className="btn-ghost mt-3 text-sm"
                   >
-                    reveal answer 👀
+                    <Eye size={16} aria-hidden="true" />
+                    reveal answer
                   </button>
                 )}
               </motion.div>
@@ -140,6 +158,7 @@ export default function RiddleGate() {
           </>
         )}
       </motion.div>
+      </div>
     </div>
   )
 }

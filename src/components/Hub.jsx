@@ -1,113 +1,145 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import {
+  Box,
+  Brain,
+  Candy,
+  Check,
+  ChevronDown,
+  CircleDot,
+  Crosshair,
+  Grid2X2,
+  Grid3X3,
+  Heart,
+  KeyRound,
+  ListChecks,
+  MailOpen,
+  Palette,
+  Puzzle,
+  Route,
+  Search,
+  Sparkles,
+  Target,
+} from 'lucide-react'
 import { content } from '../content'
 import { DAILY_GAME_COUNT, useStore } from '../store'
 import { useSound } from '../hooks/useSound'
-import TiltCard from './TiltCard'
-import { tap } from '../lib/motion'
+import { gentle, tap } from '../lib/motion'
 
 const GAMES = [
-  { id: 'memory', emoji: '🃏', title: 'Memory of Us', desc: 'Match every pair', hover: 'flip ’em all 💞' },
-  { id: 'quiz', emoji: '💭', title: 'How Well You Know Us', desc: 'A little quiz', hover: 'no pressure 😉' },
-  { id: 'scratch', emoji: '✨', title: 'A Secret For You', desc: 'Scratch to reveal', hover: 'shhh… 🤫' },
-  { id: 'pinpoint', emoji: '🎯', title: 'Pinpoint Us', desc: 'Guess from 5 clues', hover: 'read the clues 💭' },
-  { id: 'tango', emoji: '⭐', title: 'Hearts & Stars', desc: 'Fill the logic grid', hover: 'no 3 in a row 💗' },
+  { id: 'memory', icon: Brain, title: 'Memory of Us', desc: 'Match every pair' },
+  { id: 'quiz', icon: ListChecks, title: 'How Well You Know Us', desc: 'A little quiz' },
+  { id: 'scratch', icon: Sparkles, title: 'A Secret For You', desc: 'Scratch to reveal' },
+  { id: 'pinpoint', icon: Target, title: 'Pinpoint Us', desc: 'Guess from five clues' },
+  { id: 'tango', icon: Grid3X3, title: 'Hearts & Stars', desc: 'Fill the logic grid' },
 ]
 
 const BONUS = [
-  { id: 'puzzle', emoji: '🧩', title: 'Piece Us Together', desc: 'Solve the picture', hover: 'find the pieces 💝' },
-  { id: 'lovemeter', emoji: '💗', title: 'The Love Meter', desc: 'How much? find out', hover: 'spoiler: a lot 💕' },
-  { id: 'sudoku', emoji: '🔢', title: 'Mini Sudoku', desc: '1–6, no repeats', hover: 'every box counts 💛' },
-  { id: 'zip', emoji: '🧵', title: 'Zip', desc: 'One path, 1→ 6', hover: 'trace it all 💞' },
-  { id: 'wend', emoji: '🔤', title: 'Wend', desc: 'Trace hidden words', hover: 'find our words 💌' },
-  { id: 'patches', emoji: '🎨', title: 'Patches', desc: 'Color the regions', hover: 'no matching neighbors 🌈' },
-  { id: 'arrowtrail', emoji: '↪️', title: 'Arrow Trail', desc: 'Turn every arrow', hover: 'find the path to me 💗' },
-  { id: 'sweetmatch', emoji: '🍬', title: 'Sweet Match', desc: 'Match the treats', hover: 'three is extra sweet 🍭' },
-  { id: 'pocketblocks', emoji: '🧱', title: 'Pocket Blocks', desc: 'Clear three lines', hover: 'make it all fit 💫' },
-  { id: 'duckhunt', emoji: '🦆', title: 'Mini Duck Hunt', desc: 'Tap ten flying ducks', hover: 'quick, there goes one! 💨' },
+  { id: 'puzzle', icon: Puzzle, title: 'Piece Us Together', desc: 'Solve the picture' },
+  { id: 'lovemeter', icon: Heart, title: 'The Love Meter', desc: 'See how much' },
+  { id: 'sudoku', icon: Grid2X2, title: 'Mini Sudoku', desc: 'One through six' },
+  { id: 'zip', icon: Route, title: 'Zip', desc: 'Trace one perfect path' },
+  { id: 'wend', icon: Search, title: 'Wend', desc: 'Find the hidden words' },
+  { id: 'patches', icon: Palette, title: 'Patches', desc: 'Color every region' },
+  { id: 'arrowtrail', icon: CircleDot, title: 'Arrow Trail', desc: 'Turn every arrow' },
+  { id: 'sweetmatch', icon: Candy, title: 'Sweet Match', desc: 'Match the treats' },
+  { id: 'pocketblocks', icon: Box, title: 'Pocket Blocks', desc: 'Clear three lines' },
+  { id: 'duckhunt', icon: Crosshair, title: 'Mini Duck Hunt', desc: 'Catch ten targets' },
 ]
 
 const ALL_GAMES = [...GAMES, ...BONUS]
+const GAME_BY_ID = Object.fromEntries(ALL_GAMES.map((game) => [game.id, game]))
+
+function GameGrid({ games, completed, required = false, onOpenGame, play }) {
+  return (
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {games.map((game, index) => {
+        const isDone = !!completed[game.id]
+        const Icon = game.icon
+        return (
+          <motion.button
+            key={game.id}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.07 }}
+            whileHover={{ y: -3 }}
+            whileTap={tap}
+            onClick={() => {
+              play('click')
+              onOpenGame(game.id)
+            }}
+            className={`surface group relative min-h-44 w-full rounded-xl p-5 text-left transition-colors hover:border-wine/35 ${
+              required ? 'border-wine/25' : ''
+            }`}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-lg bg-blush/65 text-wine transition-colors group-hover:bg-wine group-hover:text-white">
+              <Icon size={20} strokeWidth={1.7} aria-hidden="true" />
+            </span>
+            <h3 className="mt-7 font-display text-xl leading-tight text-ink">{game.title}</h3>
+            <p className="mt-1 text-sm text-muted">{game.desc}</p>
+            <span className={`absolute right-4 top-4 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase ${
+              isDone ? 'text-sage' : required ? 'text-wine' : 'text-muted'
+            }`} style={{ letterSpacing: '0.08em' }}>
+              {isDone ? <Check size={13} /> : required ? <KeyRound size={13} /> : null}
+              {isDone ? 'done' : required ? 'required' : 'play'}
+            </span>
+          </motion.button>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function Hub({
   onOpenGame,
   onOpenFinale,
-  onOpenStickers,
-  onOpenLetters,
-  onOpenHistory,
 }) {
   const play = useSound()
   const [lockHint, setLockHint] = useState(false)
+  const [otherGamesOpen, setOtherGamesOpen] = useState(false)
   const completed = useStore((s) => s.completed)
   const challengeIds = useStore((s) => s.challengeIds)
+  const requiredGames = challengeIds.map((id) => GAME_BY_ID[id]).filter(Boolean)
+  const requiredIds = new Set(challengeIds)
+  const otherGames = ALL_GAMES.filter((game) => !requiredIds.has(game.id))
   const doneCount = challengeIds.filter((id) => completed[id]).length
   const allDone = doneCount === DAILY_GAME_COUNT
   // The Love Letter opens when it's awaiting a new letter, or once all games are done.
   const finaleReady = allDone || !!content.finale.awaiting
 
   return (
-    <div className="mx-auto max-w-4xl px-5 pb-24 pt-8">
+    <div className="mx-auto max-w-6xl px-5 pb-24 pt-10 sm:px-6 sm:pt-14">
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center"
+        className="grid gap-7 border-b border-[#e4dde0] pb-10 md:grid-cols-[1fr_auto] md:items-end"
       >
-        <h1 className="gradient-text font-script text-5xl sm:text-6xl">
-          {content.site.title}
-        </h1>
-        <p className="mt-2 text-lg text-[#6a4360]">{content.site.tagline}</p>
-
-        {/* progress hearts */}
-        <div className="mt-4 flex items-center justify-center gap-1.5">
-          {challengeIds.map((id) => (
-            <motion.span
-              key={id}
-              animate={{ scale: completed[id] ? [1, 1.4, 1] : 1 }}
-              className="text-2xl"
-            >
-              {completed[id] ? '💗' : '🤍'}
-            </motion.span>
-          ))}
+        <div>
+          <p className="editorial-label">Our private archive</p>
+          <h1 className="mt-3 max-w-2xl font-display text-5xl leading-[0.98] text-ink sm:text-6xl">
+            A little world, kept for us.
+          </h1>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
+            {content.site.tagline}
+          </p>
         </div>
-        <p className="mt-1 text-sm font-semibold text-rose/70">
-          {doneCount} / {DAILY_GAME_COUNT} of today’s games unlocked
-        </p>
-
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-          <motion.button
-            whileTap={tap}
-            onClick={() => {
-              play('click')
-              onOpenStickers()
-            }}
-            className="btn"
-          >
-            📖 Open our Sticker Book
-          </motion.button>
-          <motion.button
-            whileTap={tap}
-            onClick={() => {
-              play('click')
-              onOpenLetters()
-            }}
-            className="btn-ghost"
-          >
-            💌 Previous Letters
-          </motion.button>
-          <motion.button
-            whileTap={tap}
-            onClick={() => {
-              play('click')
-              onOpenHistory()
-            }}
-            className="btn-ghost"
-          >
-            🗓️ History of Us
-          </motion.button>
+        <div className="min-w-60">
+          <div className="flex items-center justify-between text-sm font-semibold text-ink">
+            <span>Today’s progress</span>
+            <span>{doneCount} of {DAILY_GAME_COUNT}</span>
+          </div>
+          <div className="mt-3 flex gap-2" aria-label={`${doneCount} of ${DAILY_GAME_COUNT} games complete`}>
+            {challengeIds.map((id) => (
+              <motion.span
+                key={id}
+                animate={{ scale: completed[id] ? [1, 1.08, 1] : 1 }}
+                className={`h-1.5 flex-1 rounded-full ${completed[id] ? 'bg-wine' : 'bg-[#ddd5d8]'}`}
+              />
+            ))}
+          </div>
         </div>
       </motion.header>
 
-      {/* The letter stays above the full game collection. */}
       <motion.button
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -123,83 +155,101 @@ export default function Hub({
           play('unlock')
           onOpenFinale()
         }}
-        className={`gradient-ring mt-10 w-full overflow-hidden rounded-3xl p-6 text-center sm:p-8 ${
-          finaleReady
-            ? 'bg-gradient-to-br from-rose to-periwinkle text-white'
-            : 'glass'
+        className={`relative mt-10 grid w-full overflow-hidden rounded-2xl border p-6 text-left transition-colors sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-6 sm:p-8 ${
+          finaleReady ? 'border-wine/25 bg-[#f6e9ed]' : 'surface'
         }`}
       >
-        <div className="text-6xl">{finaleReady ? '💌' : '🔒'}</div>
-        <h2 className={`mt-3 text-2xl font-bold ${finaleReady ? 'text-white' : 'text-[#6b4560]'}`}>
-          The Love Letter
-        </h2>
-        <p className={`mx-auto mt-1 max-w-xl text-sm sm:text-base ${finaleReady ? 'text-white/90' : 'text-[#7a5570]'}`}>
-          {finaleReady
-            ? content.finale.awaiting
-              ? 'No new letter yet — peek inside 💌'
-              : 'You found all 5 keys. Your new letter is ready to open 💗'
-            : 'Complete the 5 games marked 🔑 required below to open your new letter.'}
-        </p>
-        {!finaleReady && (
-          <span className="mt-3 inline-flex rounded-full bg-white/70 px-4 py-1.5 text-xs font-bold text-rose">
-            {doneCount} / {DAILY_GAME_COUNT} required games complete
+        <span className={`grid h-12 w-12 place-items-center rounded-xl ${finaleReady ? 'bg-wine text-white' : 'bg-lavender text-muted'}`}>
+          {finaleReady ? <MailOpen size={23} /> : <KeyRound size={23} />}
+        </span>
+        <span className="mt-5 block sm:mt-0">
+          <span className="editorial-label">Featured letter</span>
+          <span className="mt-1 block font-display text-3xl text-ink">The Love Letter</span>
+          <span className="mt-1 block text-sm text-muted">
+            {finaleReady
+              ? content.finale.awaiting
+                ? 'The box is open while the next letter is being written.'
+                : 'Your new letter is ready.'
+              : `Complete today’s five games to unlock it. ${doneCount} of ${DAILY_GAME_COUNT} complete.`}
           </span>
-        )}
-        {finaleReady && (
-          <span className="absolute right-5 top-5">
-            ✨
-          </span>
-        )}
+        </span>
+        <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-wine sm:mt-0">
+          {finaleReady ? 'Open letter' : 'Keep playing'}
+          <span aria-hidden="true">→</span>
+        </span>
       </motion.button>
 
-      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {ALL_GAMES.map((g, i) => {
-          const isDone = !!completed[g.id]
-          const isRequired = challengeIds.includes(g.id)
-          return (
+      <section className="mt-8" aria-labelledby="required-games-title">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="editorial-label">Daily collection</p>
+            <h2 id="required-games-title" className="mt-1 font-display text-3xl text-ink sm:text-4xl">
+              Today’s five
+            </h2>
+          </div>
+          <p className="text-sm text-muted">A fresh selection, renewed every day.</p>
+        </div>
+        <GameGrid
+          games={requiredGames}
+          completed={completed}
+          required
+          onOpenGame={onOpenGame}
+          play={play}
+        />
+      </section>
+
+      <section className="mt-10" aria-labelledby="other-games-title">
+        <motion.button
+          whileTap={tap}
+          onClick={() => {
+            play('click')
+            setOtherGamesOpen((open) => !open)
+          }}
+          className="surface flex w-full items-center justify-between rounded-xl px-5 py-4 text-left sm:px-6"
+          aria-expanded={otherGamesOpen}
+          aria-controls="other-games-panel"
+        >
+          <span>
+            <span id="other-games-title" className="block font-display text-xl text-ink">
+              The full collection
+            </span>
+            <span className="mt-0.5 block text-sm text-muted">
+              {otherGames.length} more games to revisit anytime
+            </span>
+          </span>
+          <motion.span
+            animate={{ rotate: otherGamesOpen ? 180 : 0 }}
+            transition={gentle}
+            className="ml-4 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#e4dde0] bg-white text-wine"
+            aria-hidden="true"
+          >
+            <ChevronDown size={18} />
+          </motion.span>
+        </motion.button>
+
+        <AnimatePresence initial={false}>
+          {otherGamesOpen && (
             <motion.div
-              key={g.id}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              whileHover={{ y: -6 }}
+              id="other-games-panel"
+              key="other-games"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={gentle}
+              className="overflow-hidden"
             >
-              <TiltCard
-                whileTap={tap}
-                onClick={() => {
-                  play('click')
-                  onOpenGame(g.id)
-                }}
-                className={`glass group relative block w-full overflow-hidden rounded-3xl p-6 text-left ${
-                  isRequired ? 'gradient-ring' : ''
-                }`}
-              >
-                <div className="text-5xl">{g.emoji}</div>
-                <h3 className="mt-3 text-xl font-bold text-[#6b4560]">{g.title}</h3>
-                <p className="text-sm text-[#7a5570]">
-                  <span className="transition-opacity duration-200 group-hover:opacity-0">
-                    {g.desc}
-                  </span>
-                  <span className="absolute left-6 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    {g.hover}
-                  </span>
-                </p>
-                <span
-                  className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold ${
-                    isDone
-                      ? 'bg-mint/60 text-emerald-700'
-                      : isRequired
-                        ? 'bg-petal/90 text-rose'
-                        : 'bg-white/70 text-rose'
-                  }`}
-                >
-                  {isDone ? 'done 💗' : isRequired ? '🔑 required' : 'play'}
-                </span>
-              </TiltCard>
+              <div className="pt-5">
+                <GameGrid
+                  games={otherGames}
+                  completed={completed}
+                  onOpenGame={onOpenGame}
+                  play={play}
+                />
+              </div>
             </motion.div>
-          )
-        })}
-      </div>
+          )}
+        </AnimatePresence>
+      </section>
 
       <AnimatePresence>
         {lockHint && (

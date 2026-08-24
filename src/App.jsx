@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { ArrowLeft, Heart, RotateCcw } from 'lucide-react'
 import { content } from './content'
 import { DAY_MS, useStore } from './store'
 import { useStickerSheet } from './hooks/useStickerSheet'
 import { spriteCellStyle } from './lib/sprite'
 import { pageTransition, spring, tap } from './lib/motion'
 
-import FloatingHearts from './components/FloatingHearts'
 import GrainOverlay from './components/GrainOverlay'
 import Confetti from './components/Confetti'
 import Modal from './components/Modal'
+import AppNav from './components/AppNav'
 import Hub from './components/Hub'
 import FinaleLetter from './components/FinaleLetter'
 import StickerBook from './components/StickerBook'
@@ -49,6 +50,24 @@ const GAME_COMPONENTS = {
   sweetmatch: SweetMatch,
   pocketblocks: PocketBlocks,
   duckhunt: DuckHunt,
+}
+
+const GAME_TITLES = {
+  memory: 'Memory of Us',
+  quiz: 'How Well You Know Us',
+  scratch: 'A Secret For You',
+  puzzle: 'Piece Us Together',
+  lovemeter: 'The Love Meter',
+  pinpoint: 'Pinpoint Us',
+  tango: 'Hearts & Stars',
+  sudoku: 'Mini Sudoku',
+  zip: 'Zip',
+  wend: 'Wend',
+  patches: 'Patches',
+  arrowtrail: 'Arrow Trail',
+  sweetmatch: 'Sweet Match',
+  pocketblocks: 'Pocket Blocks',
+  duckhunt: 'Mini Duck Hunt',
 }
 
 export default function App() {
@@ -145,6 +164,10 @@ export default function App() {
     img.src = `${import.meta.env.BASE_URL}${src}`
   }, [])
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [view])
+
   const ActiveGame =
     view !== 'hub' &&
     view !== 'finale' &&
@@ -178,7 +201,6 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen">
-      <FloatingHearts count={ActiveGame ? 0 : 4} />
       <GrainOverlay />
       {celebrate && <Confetti />}
 
@@ -186,8 +208,7 @@ export default function App() {
         {splash && (
           <motion.div
             key="splash"
-            className="fixed inset-0 z-[60] grid place-items-center"
-            style={{ background: 'linear-gradient(135deg,#ffe3f1,#e9dcff,#d3f7ee)' }}
+            className="fixed inset-0 z-[60] grid place-items-center bg-porcelain"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6 }}
@@ -198,12 +219,15 @@ export default function App() {
               transition={spring}
               className="text-center"
             >
-              <div className="text-7xl">💗</div>
-              <p className="gradient-text mt-3 font-script text-4xl">For My Num Num</p>
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-xl bg-ink font-display text-3xl text-white">N</div>
+              <p className="mt-5 font-display text-4xl text-ink">For My Num Num</p>
+              <p className="editorial-label mt-2">A private archive</p>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {entered && <AppNav view={view} onNavigate={setView} />}
 
       <AnimatePresence mode="wait">
         {!entered ? (
@@ -215,9 +239,6 @@ export default function App() {
             <Hub
               onOpenGame={(id) => setView(id)}
               onOpenFinale={() => setView('finale')}
-              onOpenStickers={() => setView('stickers')}
-              onOpenLetters={() => setView('letters')}
-              onOpenHistory={() => setView('history')}
             />
             <Footer onAskReset={() => setAskReset(true)} />
           </motion.div>
@@ -244,16 +265,24 @@ export default function App() {
           <motion.div
             key={view}
             {...pageTransition}
-            className="mx-auto max-w-3xl px-5 pb-24 pt-16"
+            className="mx-auto max-w-5xl px-5 pb-24 pt-10"
           >
-            <motion.button
-              whileTap={tap}
-              onClick={() => setView('hub')}
-              className="btn-ghost mb-6"
-            >
-              ← back
-            </motion.button>
-            <div className="glass rounded-[2rem] p-6 sm:p-8">
+            <div className="mb-6 flex items-center gap-4">
+              <motion.button
+                whileTap={tap}
+                onClick={() => setView('hub')}
+                className="icon-button"
+                aria-label="Back to home"
+                title="Back to home"
+              >
+                <ArrowLeft size={19} aria-hidden="true" />
+              </motion.button>
+              <div>
+                <p className="editorial-label">Today’s collection</p>
+                <h1 className="mt-1 font-display text-3xl text-ink sm:text-4xl">{GAME_TITLES[view]}</h1>
+              </div>
+            </div>
+            <div className="game-shell surface rounded-2xl p-5 sm:p-8">
               <ActiveGame onComplete={() => handleComplete(view)} />
             </div>
           </motion.div>
@@ -273,12 +302,14 @@ export default function App() {
                 style={spriteCellStyle(sheetUrl, sheet, noteSticker.r, noteSticker.c)}
               />
             ) : (
-              <div className="mb-3 text-5xl">💝</div>
+              <span className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-lg bg-blush/70 text-wine">
+                <Heart size={22} strokeWidth={1.7} aria-hidden="true" />
+              </span>
             )}
-            <h3 className="gradient-text font-script text-3xl">{note.title}</h3>
-            <p className="mt-3 text-lg text-[#6b4560]">{note.body}</p>
+            <h3 className="font-display text-3xl text-ink">{note.title}</h3>
+            <p className="mt-3 leading-relaxed text-muted">{note.body}</p>
             <motion.button whileTap={tap} onClick={() => setNote(null)} className="btn mt-6">
-              aww 💕
+              Continue
             </motion.button>
           </div>
         )}
@@ -287,9 +318,11 @@ export default function App() {
       {/* styled "start over" confirmation (replaces the native confirm dialog) */}
       <Modal open={askReset} onClose={() => setAskReset(false)}>
         <div className="text-center">
-          <div className="mb-3 text-5xl">↺</div>
-          <h3 className="gradient-text font-script text-3xl">Start over?</h3>
-          <p className="mt-3 text-[#6b4560]">
+          <span className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-lg bg-lavender text-muted">
+            <RotateCcw size={21} aria-hidden="true" />
+          </span>
+          <h3 className="font-display text-3xl text-ink">Start over?</h3>
+          <p className="mt-3 leading-relaxed text-muted">
             This clears your progress and replays everything from the very beginning.
           </p>
           <div className="mt-6 flex justify-center gap-3">
@@ -314,12 +347,14 @@ export default function App() {
 
 function Footer({ onAskReset }) {
   return (
-    <footer className="pointer-events-none fixed bottom-3 left-0 right-0 z-30 flex justify-center">
+    <footer className="mx-auto flex max-w-6xl justify-center border-t border-[#e4dde0] px-5 py-8 sm:px-6">
       <button
         onClick={onAskReset}
-        className="pointer-events-auto rounded-full bg-white/50 px-4 py-1.5 text-xs font-semibold text-rose/80 backdrop-blur transition hover:bg-white/80"
+        className="flex items-center gap-2 rounded-lg border border-[#e4dde0] bg-white/80 px-3 py-2 text-xs font-semibold text-muted transition hover:border-wine/35 hover:text-wine"
+        title="Start over"
       >
-        ↺ start over
+        <RotateCcw size={14} aria-hidden="true" />
+        start over
       </button>
     </footer>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, BookOpen, Mail } from 'lucide-react'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
 import { tap } from '../lib/motion'
@@ -21,7 +22,7 @@ export default function FinaleLetter({ onClose, onOpenPrevious }) {
   }
 
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center p-4 text-center">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-5 py-14 text-center">
       {celebrate && <Confetti />}
 
       <AnimatePresence mode="wait">
@@ -32,13 +33,16 @@ export default function FinaleLetter({ onClose, onOpenPrevious }) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.6 }}
-            className="group relative"
+            className="group relative w-full max-w-xl"
           >
-            <div className="text-[8rem] drop-shadow-[0_10px_30px_rgba(255,143,177,0.6)] transition group-hover:scale-105">
-              💌
+            <div className="paper mx-auto grid aspect-[1.45/1] w-full max-w-sm place-items-center rounded-xl transition duration-300 group-hover:-translate-y-1 group-hover:shadow-soft">
+              <span className="grid h-16 w-16 place-items-center rounded-xl bg-wine text-white">
+                <Mail size={30} strokeWidth={1.5} aria-hidden="true" />
+              </span>
             </div>
-            <p className="gradient-text mt-2 font-script text-3xl">The Love Letter</p>
-            <p className="mt-1 text-[#7a5570]">tap to open 💗</p>
+            <p className="editorial-label mt-8">The featured letter</p>
+            <h1 className="mt-2 font-display text-4xl text-ink sm:text-5xl">The Love Letter</h1>
+            <p className="mt-3 text-sm text-muted">Open the envelope</p>
           </motion.button>
         ) : (
           <motion.div key="letter" className="flex w-full flex-col items-center">
@@ -56,11 +60,13 @@ export default function FinaleLetter({ onClose, onOpenPrevious }) {
                   }}
                   className="btn"
                 >
-                  📜 Read previous letters
+                  <BookOpen size={17} aria-hidden="true" />
+                  Read previous letters
                 </motion.button>
               )}
               <motion.button whileTap={tap} onClick={onClose} className="btn-ghost">
-                ← back to our little world
+                <ArrowLeft size={17} aria-hidden="true" />
+                back to our little world
               </motion.button>
             </div>
           </motion.div>

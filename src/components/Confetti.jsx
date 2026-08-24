@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
-const COLORS = ['#ff8fb1', '#c9a0ff', '#ffd6e8', '#ffe0c7', '#c4f5e9', '#c9e6ff']
+const COLORS = ['#8f4058', '#71867a', '#e7bcc8', '#d8ced2', '#f0e5df']
 
 // A quick celebratory burst of confetti + hearts
-export default function Confetti({ pieces = 60 }) {
+export default function Confetti({ pieces = 36 }) {
   const reduce = useReducedMotion()
   const bits = useMemo(
     () =>
@@ -16,8 +16,8 @@ export default function Confetti({ pieces = 60 }) {
         delay: Math.random() * 0.3,
         duration: 1.6 + Math.random(),
         color: COLORS[i % COLORS.length],
-        heart: Math.random() > 0.6,
-        size: 8 + Math.random() * 10,
+        heart: Math.random() > 0.82,
+        size: 7 + Math.random() * 8,
       })),
     [pieces, reduce],
   )

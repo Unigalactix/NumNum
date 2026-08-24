@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, ArrowRight, Mail } from 'lucide-react'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
 import { tap, pageTransition } from '../lib/motion'
@@ -14,50 +15,59 @@ export default function PreviousLetters({ onClose }) {
   const [openIdx, setOpenIdx] = useState(null)
 
   return (
-    <div className="mx-auto max-w-3xl px-5 pb-24 pt-16">
+    <div className="mx-auto max-w-5xl px-5 pb-24 pt-10 sm:px-6 sm:pt-14">
       <button
         onClick={() => {
           play('click')
           onClose()
         }}
-        className="btn-ghost mb-6"
+        className="icon-button mb-8"
+        aria-label="Back to home"
+        title="Back to home"
       >
-        ← back
+        <ArrowLeft size={19} aria-hidden="true" />
       </button>
 
-      <div className="text-center">
-        <h2 className="gradient-text font-script text-4xl sm:text-5xl">Previous Letters</h2>
-        <p className="mt-2 text-[#7a5570]">every letter I’ve written you, kept safe 💌</p>
+      <div className="max-w-2xl">
+        <span className="grid h-11 w-11 place-items-center rounded-lg bg-blush/70 text-wine">
+          <Mail size={21} strokeWidth={1.7} aria-hidden="true" />
+        </span>
+        <p className="editorial-label mt-7">The archive</p>
+        <h1 className="mt-2 font-display text-5xl leading-none text-ink sm:text-6xl">Previous Letters</h1>
+        <p className="mt-4 text-base leading-relaxed text-muted">Every letter, dated and kept safely in one place.</p>
       </div>
 
       <AnimatePresence mode="wait">
         {openIdx === null ? (
-          <motion.div key="list" {...pageTransition} className="mt-8 grid gap-5 sm:grid-cols-2">
+          <motion.div key="list" {...pageTransition} className="mt-12 grid gap-4 sm:grid-cols-2">
             {letters.length === 0 ? (
               <p className="col-span-full text-center text-[#7a5570]">
                 No letters yet — the first one is on its way 💗
               </p>
             ) : (
-              letters.map((l, i) => (
+              letters.map((letter, index) => (
                 <motion.button
-                  key={i}
+                  key={`${letter.date}-${letter.title}`}
                   whileTap={tap}
-                  whileHover={{ y: -6 }}
+                  whileHover={{ y: -3 }}
                   onClick={() => {
                     play('unlock')
-                    setOpenIdx(i)
+                    setOpenIdx(index)
                   }}
-                  className="glass relative overflow-hidden rounded-3xl p-6 text-left"
+                  className="surface group relative min-h-56 overflow-hidden rounded-xl p-6 text-left transition-colors hover:border-wine/35"
                 >
-                  <div className="text-4xl">💌</div>
-                  <h3 className="mt-3 text-xl font-bold text-[#6b4560]">{l.title}</h3>
-                  {l.date && (
-                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-rose/60">
-                      {l.date}
+                  <Mail size={20} strokeWidth={1.6} className="text-wine" aria-hidden="true" />
+                  {letter.date && (
+                    <p className="editorial-label mt-7 text-wine">
+                      {letter.date}
                     </p>
                   )}
-                  <span className="absolute right-4 top-4 rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-rose">
-                    open
+                  <h2 className="mt-2 font-display text-2xl leading-tight text-ink">{letter.title}</h2>
+                  <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted">
+                    {letter.body.split('\n')[0]}
+                  </p>
+                  <span className="absolute bottom-5 right-5 text-wine transition-transform group-hover:translate-x-1">
+                    <ArrowRight size={18} aria-hidden="true" />
                   </span>
                 </motion.button>
               ))
@@ -76,7 +86,8 @@ export default function PreviousLetters({ onClose }) {
               }}
               className="btn-ghost mt-6"
             >
-              ← all letters
+              <ArrowLeft size={17} aria-hidden="true" />
+              all letters
             </button>
           </motion.div>
         )}

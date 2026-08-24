@@ -27,21 +27,19 @@ export default function TypedLetter({ letter, footer, start = true }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60, rotateX: 40 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ type: 'spring', stiffness: 90, damping: 16 }}
-      className="glass gradient-ring relative w-full max-w-xl rounded-[2rem] p-8 text-left sm:p-10"
+      initial={reduce ? false : { opacity: 0, y: 28, scale: 0.985 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      className="paper relative w-full max-w-2xl rounded-xl px-7 py-10 text-left sm:px-12 sm:py-14"
     >
-      <div className="pointer-events-none absolute -right-3 -top-3 text-4xl">🌸</div>
-      <div className="pointer-events-none absolute -bottom-3 -left-3 text-4xl">💗</div>
-
-      <h2 className="gradient-text font-script text-4xl">{title}</h2>
+      <div className="mb-8 h-px w-12 bg-wine" />
+      <h2 className="font-display text-4xl leading-tight text-ink sm:text-5xl">{title}</h2>
       {date && (
-        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-rose/60">
+        <p className="editorial-label mt-3 text-wine">
           {date}
         </p>
       )}
-      <div className="mt-4 space-y-4 whitespace-pre-line text-lg leading-relaxed text-[#6b4560]">
+      <div className="mt-8 whitespace-pre-line font-display text-xl leading-[1.75] text-ink sm:text-[1.35rem]">
         {typed}
         {!reduce && typed.length < body.length && (
           <span aria-hidden className="ml-0.5 inline-block">
@@ -49,8 +47,8 @@ export default function TypedLetter({ letter, footer, start = true }) {
           </span>
         )}
       </div>
-      <p className="mt-6 font-script text-2xl text-rose">{signoff}</p>
-      {footer && <p className="mt-2 text-right text-sm text-[#7a5570]">{footer}</p>}
+      <p className="mt-10 font-script text-2xl text-wine">{signoff}</p>
+      {footer && <p className="mt-3 border-t border-[#e8e0dc] pt-4 text-right text-xs font-semibold text-muted">{footer}</p>}
     </motion.div>
   )
 }

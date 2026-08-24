@@ -3,9 +3,16 @@
 A small, personal "little world of love" web app (a gift). Treat all copy with care and keep the tone soft, playful, and romantic.
 
 ## Stack
-- Vite + React 18 + Zustand + Tailwind CSS + Framer Motion.
+- Vite + React 18 + Zustand + Tailwind CSS + Framer Motion + Lucide React.
 - Emoji are rendered site-wide as **Twemoji** images (loaded in `index.html`, parsed in `App.jsx`) so they look identical on every device.
-- Headings use the **Dancing Script** font (`font-script`); body uses **Quicksand** (`font-sans`).
+- Display headings use **Newsreader** (`font-display`); UI/body copy uses **Manrope** (`font-sans`). Reserve **Dancing Script** (`font-script`) for letter signoffs and rare handwritten moments.
+
+## Visual direction
+- The product is a **modern editorial keepsake**: porcelain surfaces, ink text, muted wine and sage accents, quiet borders, restrained shadows, and paper-like letter surfaces.
+- Keep hierarchy editorial and content-led. Avoid rainbow gradients, heavy glassmorphism, oversized emoji, pill-heavy UI, excessive rounded cards, decorative tilt, floating hearts, and page-wide blur effects.
+- Use Lucide icons for navigation and controls. Use Twemoji only where an emoji carries personal meaning, memory, or game content.
+- Prefer `8–16px` radii, stable card dimensions, generous whitespace, and readable serif typography over decorative effects.
+- Motion should orient or reveal meaning. Keep page transitions quiet, timeline reveals viewport-based, and confetti limited to meaningful first-time completions.
 
 ## Commands
 - Dev server: `npm run dev` (served under base path `/NumNum/`, e.g. http://localhost:5173/NumNum/).
@@ -16,7 +23,7 @@ A small, personal "little world of love" web app (a gift). Treat all copy with c
 - ONLY commit, push, or deploy when the user explicitly asks.
 - Commit AND push as **Unigalactix**:
   `git -c user.name="Unigalactix" -c user.email="Unigalactix@users.noreply.github.com" commit ...`
-- Repo: `Unigalactix/NumNum`. Source work happens on `VERSION-2`; `main` is the mainline. Pages serves from `gh-pages`.
+- Repo: `Unigalactix/NumNum`. Source work happens on `main`. Pages serves from `gh-pages`.
 - To verify work, build/run locally — do NOT push or deploy just to verify.
 
 ## Content lives in `src/content.js`
@@ -40,9 +47,11 @@ All personal copy is edited here. Key sections:
 
 ## Key behaviors to preserve
 - Finale gating logic lives in `components/Hub.jsx` as `finaleReady = allDone || !!content.finale.awaiting`.
+- The store randomly selects exactly 5 required games per daily cycle. Show those 5 first in the hub, and keep every remaining game in the smoothly expandable/collapsible full collection.
+- History of Us timeline cards reveal as they enter the viewport with Framer Motion; preserve an instant, non-animated state for reduced-motion users.
 - Reduced-motion users get instant text (no typewriter) — keep `useReducedMotion` support in letter components.
 - Modals close on Escape and trap focus (`components/Modal.jsx`).
-- Keep the glassmorphism look, pastel gradient background, and `:focus-visible` rings intact.
+- Keep the editorial design tokens, app navigation, game shell, paper letter treatment, and `:focus-visible` rings intact.
 
 ## Do / Don't
 - Do keep copy lowercase-casual where it already is; match existing voice.
