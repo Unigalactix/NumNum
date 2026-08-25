@@ -25,6 +25,7 @@ import { content } from '../content'
 import { DAILY_GAME_COUNT, useStore } from '../store'
 import { useSound } from '../hooks/useSound'
 import { gentle, tap } from '../lib/motion'
+import MorningLoveNotes from './MorningLoveNotes'
 
 const GAMES = [
   { id: 'memory', icon: Brain, title: 'Memory of Us', desc: 'Match every pair' },
@@ -139,6 +140,8 @@ export default function Hub({
           </div>
         </div>
       </motion.header>
+
+      <MorningLoveNotes />
 
       <motion.button
         initial={{ opacity: 0, y: 24 }}

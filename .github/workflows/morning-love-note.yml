@@ -1,0 +1,36 @@
+name: Send morning love note
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Preview the notification without sending it
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-24.04
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+      NUMNUM_SITE_URL: https://unigalactix.github.io/NumNum/
+      ONESIGNAL_APP_ID: a8eaa49d-51c4-426f-8bcb-63bd36f32b5a
+      ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Schedule morning love note
+        run: node scripts/send-love-note.mjs

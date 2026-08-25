@@ -31,6 +31,39 @@ array in `src/content.js` (see `public/assets/README.txt`).
 Progress is saved in the browser (localStorage), and there's a mute toggle and a
 "start over" button.
 
+## Morning love notes
+
+The hub includes an opt-in for one browser push notification near 9:00 AM in
+each subscriber's local time. The 1,000 original messages are generated in
+`src/loveNotes.js`; the OneSignal sender is `scripts/send-love-note.mjs`.
+
+1. Create a **Custom Code** Web app in OneSignal. Use the site origin
+   `https://unigalactix.github.io` and enable Auto Resubscribe. The SDK uses the
+   dedicated worker at `/NumNum/push/onesignal/OneSignalSDKWorker.js` with scope
+   `/NumNum/push/onesignal/`; Custom Code does not require dashboard worker-path
+   fields.
+2. The public OneSignal App ID is already configured in the web SDK and sender.
+   In GitHub repository **Settings → Secrets and variables → Actions**, add only
+   the `ONESIGNAL_REST_API_KEY` repository secret.
+3. For local testing with a different OneSignal app, copy `.env.example` to
+   `.env.local` and replace the App ID. Never put the REST API key in a Vite
+   environment file.
+4. Deploy the site, open it on the recipient's device, and choose **Enable
+   notes**. On iPhone, first add the site to the Home Screen and open it there.
+5. Run the **Send morning love note** workflow manually with dry-run enabled to
+   preview its payload. Scheduled runs send to opted-in browsers automatically.
+
+Preview a message locally without contacting OneSignal:
+
+```bash
+npm run notifications:dry-run
+```
+
+The GitHub schedule runs at 12:00 UTC and asks OneSignal to deliver at each
+subscriber's next local 9:00 AM. GitHub may disable scheduled workflows after
+long periods of repository inactivity; re-enable the workflow if that occurs.
+
+
 ## Deploy to GitHub Pages
 
 1. Create a GitHub repo named **`NumNum`** (the name must match `base` in
