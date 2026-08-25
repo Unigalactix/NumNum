@@ -27,7 +27,6 @@ const notification = {
   ],
   headings: { en: note.title },
   target_channel: 'push',
-  throttle_rate_per_minute: 0,
   url: siteUrl,
 }
 
@@ -52,6 +51,10 @@ const response = await fetch('https://api.onesignal.com/notifications', {
 const result = await response.json()
 if (!response.ok || result.errors) {
   throw new Error(`OneSignal rejected the notification: ${JSON.stringify(result)}`)
+}
+
+if (!result.id) {
+  throw new Error('OneSignal found no eligible morning-love-note subscribers.')
 }
 
 console.log(`Scheduled love note ${note.index + 1} for subscribers' local 9:00 AM.`)

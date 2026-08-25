@@ -21,5 +21,6 @@ pnpm-debug.log*
 # editor / os
 .vscode/*
 !.vscode/extensions.json
+!.vscode/mcp.json
 .DS_Store
 Thumbs.db

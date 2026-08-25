@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "onesignal": {
+      "type": "http",
+      "url": "https://api.onesignal.com/mcp/oauth"
+    }
+  }
+}
