@@ -1,6 +1,7 @@
 import { BookHeart, Clock3, Home, Mail } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { tap } from '../lib/motion'
+import MorningLoveNotes from './MorningLoveNotes'
 
 const ITEMS = [
   { id: 'hub', label: 'Home', icon: Home },
@@ -48,6 +49,7 @@ export default function AppNav({ view, onNavigate }) {
               </motion.button>
             )
           })}
+          <MorningLoveNotes />
         </nav>
       </div>
     </header>

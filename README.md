@@ -31,11 +31,13 @@ array in `src/content.js` (see `public/assets/README.txt`).
 Progress is saved in the browser (localStorage), and there's a mute toggle and a
 "start over" button.
 
-## Morning love notes
+## Daily love notes
 
-The hub includes an opt-in for one browser push notification near 9:00 AM in
-each subscriber's local time. The 1,000 original messages are generated in
-`src/loveNotes.js`; the OneSignal sender is `scripts/send-love-note.mjs`.
+The navbar bell opts a browser into two daily push notifications in each
+subscriber's local time: a loving morning note near 9:00 AM and an encouraging
+afternoon note at a daily-varying time between 3:00 PM and 5:30 PM. Both original
+1,000-message collections are generated in `src/loveNotes.js`; the OneSignal
+sender is `scripts/send-love-note.mjs`.
 
 1. Create a **Custom Code** Web app in OneSignal. Use the site origin
    `https://unigalactix.github.io` and enable Auto Resubscribe. The SDK uses the
@@ -50,7 +52,7 @@ each subscriber's local time. The 1,000 original messages are generated in
    environment file.
 4. Deploy the site, open it on the recipient's device, and choose **Enable
    notes**. On iPhone, first add the site to the Home Screen and open it there.
-5. Run the **Send morning love note** workflow manually with dry-run enabled to
+5. Run the **Send daily love notes** workflow manually with dry-run enabled to
    preview its payload. Scheduled runs send to opted-in browsers automatically.
 
 Preview a message locally without contacting OneSignal:
@@ -59,9 +61,10 @@ Preview a message locally without contacting OneSignal:
 npm run notifications:dry-run
 ```
 
-The GitHub schedule runs at 12:00 UTC and asks OneSignal to deliver at each
-subscriber's next local 9:00 AM. GitHub may disable scheduled workflows after
-long periods of repository inactivity; re-enable the workflow if that occurs.
+The GitHub schedule runs at 00:00 UTC and queues both messages with OneSignal
+for their per-subscriber local delivery times. GitHub may disable scheduled
+workflows after long periods of repository inactivity; re-enable the workflow
+if that occurs.
 
 
 ## Deploy to GitHub Pages

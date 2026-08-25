@@ -1,8 +1,8 @@
-name: Send morning love note
+name: Send daily love notes
 
 on:
   schedule:
-    - cron: '0 12 * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -17,8 +17,13 @@ permissions:
 jobs:
   send:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        period: [morning, afternoon]
     env:
       DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+      NOTE_PERIOD: ${{ matrix.period }}
       NUMNUM_SITE_URL: https://unigalactix.github.io/NumNum/
       ONESIGNAL_APP_ID: a8eaa49d-51c4-426f-8bcb-63bd36f32b5a
       ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
@@ -32,5 +37,5 @@ jobs:
         with:
           node-version: 20
 
-      - name: Schedule morning love note
+      - name: Schedule ${{ matrix.period }} love note
         run: node scripts/send-love-note.mjs

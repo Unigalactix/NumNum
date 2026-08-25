@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Bell, BellOff, Check, Clock3, LoaderCircle } from 'lucide-react'
+import { Bell, BellOff, LoaderCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { createPortal } from 'react-dom'
 import {
   disableMorningNotes,
   enableMorningNotes,
   notificationStatus,
   notificationSupport,
 } from '../lib/oneSignal'
+import { tap } from '../lib/motion'
+import Modal from './Modal'
 
 const INITIAL = { permission: 'default', subscribed: false }
 
@@ -19,6 +23,7 @@ export default function MorningLoveNotes() {
   const [status, setStatus] = useState(INITIAL)
   const [busy, setBusy] = useState(support.configured && support.supported && !iosNeedsInstall)
   const [error, setError] = useState('')
+  const [confirmPause, setConfirmPause] = useState(false)
 
   useEffect(() => {
     if (!support.configured || !support.supported || iosNeedsInstall) return
@@ -40,12 +45,16 @@ export default function MorningLoveNotes() {
   }, [iosNeedsInstall, support.configured, support.supported])
 
   const toggle = async () => {
+    if (status.subscribed) {
+      setError('')
+      setConfirmPause(true)
+      return
+    }
+
     setBusy(true)
     setError('')
     try {
-      const next = status.subscribed
-        ? await disableMorningNotes()
-        : await enableMorningNotes()
+      const next = await enableMorningNotes()
       setStatus(next)
     } catch {
       setStatus((current) => ({ ...current, permission: Notification.permission }))
@@ -55,45 +64,50 @@ export default function MorningLoveNotes() {
     }
   }
 
+  const pause = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      const next = await disableMorningNotes()
+      setStatus(next)
+      setConfirmPause(false)
+    } catch {
+      setStatus((current) => ({ ...current, permission: Notification.permission }))
+      setError('The browser could not pause your love notes. Please try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const denied = status.permission === 'denied'
   const enabled = status.subscribed && status.permission === 'granted'
+  const unavailable = !support.configured || !support.supported
+  const disabled = busy || denied || iosNeedsInstall || unavailable
+  const label = busy
+    ? 'Checking daily love notes'
+    : enabled
+      ? 'Pause daily love notes'
+      : denied
+        ? 'Notifications are blocked in browser settings'
+        : iosNeedsInstall
+          ? 'Add NumNum to your Home Screen to enable notifications'
+          : unavailable
+            ? 'Daily love notes are unavailable'
+            : error || 'Enable daily love notes'
 
   return (
-    <section className="surface mt-8 grid gap-5 rounded-xl p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:p-6" aria-labelledby="morning-notes-title">
-      <span className={`grid h-11 w-11 place-items-center rounded-lg ${enabled ? 'bg-sage text-white' : 'bg-blush/65 text-wine'}`}>
-        {enabled ? <Check size={20} aria-hidden="true" /> : <Bell size={20} aria-hidden="true" />}
-      </span>
-
-      <div>
-        <p className="editorial-label">A daily ritual</p>
-        <h2 id="morning-notes-title" className="mt-1 font-display text-2xl text-ink">
-          Morning love notes
-        </h2>
-        <p className="mt-1 flex items-center gap-1.5 text-sm leading-relaxed text-muted">
-          <Clock3 size={14} className="shrink-0" aria-hidden="true" />
-          One new note every day around 9:00 AM, in your local time.
-        </p>
-        {!support.configured && (
-          <p className="mt-2 text-sm text-muted">The morning-note service is being prepared.</p>
-        )}
-        {!support.supported && support.configured && (
-          <p className="mt-2 text-sm text-muted">This browser does not support web notifications.</p>
-        )}
-        {iosNeedsInstall && support.configured && (
-          <p className="mt-2 text-sm text-muted">In Safari, first choose Share, then Add to Home Screen. Open NumNum there to enable notes.</p>
-        )}
-        {denied && (
-          <p className="mt-2 text-sm text-wine">Notifications are blocked in this browser’s site settings.</p>
-        )}
-        {error && <p className="mt-2 text-sm text-wine" role="status">{error}</p>}
-      </div>
-
-      <button
+    <>
+      <motion.button
         type="button"
+        whileTap={tap}
         onClick={toggle}
-        disabled={busy || denied || iosNeedsInstall || !support.configured || !support.supported}
-        className={enabled ? 'btn-ghost min-w-36' : 'btn min-w-36'}
+        disabled={disabled}
+        className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-lg transition ${
+          enabled ? 'bg-white text-wine shadow-soft' : 'text-muted hover:bg-white/65 hover:text-ink'
+        } disabled:cursor-not-allowed disabled:opacity-45`}
         aria-pressed={enabled}
+        aria-label={label}
+        title={label}
       >
         {busy ? (
           <LoaderCircle className="animate-spin" size={17} aria-hidden="true" />
@@ -102,8 +116,38 @@ export default function MorningLoveNotes() {
         ) : (
           <Bell size={17} aria-hidden="true" />
         )}
-        {busy ? 'Checking…' : enabled ? 'Pause notes' : iosNeedsInstall ? 'Install first' : 'Enable notes'}
-      </button>
-    </section>
+        {enabled && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-sage" aria-hidden="true" />}
+      </motion.button>
+
+      {typeof document !== 'undefined' && createPortal(
+        <Modal open={confirmPause} onClose={() => !busy && setConfirmPause(false)}>
+          <div className="text-center">
+            <span className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-lg bg-blush/65 text-wine">
+              <BellOff size={21} aria-hidden="true" />
+            </span>
+            <h3 className="font-display text-3xl text-ink">Pause your daily love notes?</h3>
+            <p className="mt-3 leading-relaxed text-muted">
+              Your mornings and afternoons will be a little quieter. You can turn them back on anytime from the bell.
+            </p>
+            {error && <p className="mt-3 text-sm text-wine" role="status">{error}</p>}
+            <div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => setConfirmPause(false)}
+                disabled={busy}
+                className="btn-ghost"
+              >
+                Keep them coming
+              </button>
+              <button type="button" onClick={pause} disabled={busy} className="btn">
+                {busy && <LoaderCircle className="animate-spin" size={17} aria-hidden="true" />}
+                {busy ? 'Pausing…' : 'Okay, pause them'}
+              </button>
+            </div>
+          </div>
+        </Modal>,
+        document.body,
+      )}
+    </>
   )
 }

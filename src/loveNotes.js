@@ -64,3 +64,70 @@ export function loveNoteForDay(dayNumber) {
     title: loveNoteTitles[index % loveNoteTitles.length],
   }
 }
+
+const AFTERNOON_OPENERS = [
+  'A little afternoon lift:',
+  'Hey, beautiful, remember:',
+  'A gentle pause for you:',
+  'Midday note from my heart:',
+  'For my hardworking love:',
+  'In case today feels heavy:',
+  'A small reminder, Num Num:',
+  'Before the day runs away:',
+  'Sending you a soft thought:',
+  'Your afternoon love note:',
+]
+
+const ENCOURAGEMENTS = [
+  'You are doing better than you think.',
+  'Your quiet strength amazes me every day.',
+  'One hard moment cannot define your whole day.',
+  'You have everything you need for the next step.',
+  'The care you give the world always matters.',
+  'You can take this day one small step at a time.',
+  'I believe in you, especially on the tiring days.',
+  'Your best today is already more than enough.',
+  'There is so much courage inside your soft heart.',
+  'Whatever comes next, you do not face it alone.',
+]
+
+const AFTERNOON_CLOSERS = [
+  'I am cheering for you.',
+  'You have my whole heart.',
+  'Breathe; I am right here.',
+  'Keep going gently, my love.',
+  'I am so proud of you.',
+  'Save some softness for you.',
+  'We have got this together.',
+  'Sending you the biggest hug.',
+  'You are deeply loved.',
+  'Come back to my love anytime.',
+]
+
+export const afternoonNoteTitles = [
+  'A little afternoon lift',
+  'You have got this, my love',
+  'A soft reminder for you',
+  'From your biggest supporter',
+  'A hug for the rest of today',
+  'Keep going gently, beautiful',
+  'Some love for your afternoon',
+  'I believe in you',
+  'For my strong Num Num',
+  'Right here in your corner',
+]
+
+export const afternoonNotes = AFTERNOON_OPENERS.flatMap((opener) =>
+  ENCOURAGEMENTS.flatMap((encouragement) =>
+    AFTERNOON_CLOSERS.map((closer) => `${opener} ${encouragement} ${closer}`),
+  ),
+)
+
+export function afternoonNoteForDay(dayNumber) {
+  const index = Math.abs(dayNumber * 37 + 17) % afternoonNotes.length
+  return {
+    body: afternoonNotes[index],
+    index,
+    title: afternoonNoteTitles[index % afternoonNoteTitles.length],
+  }
+}
