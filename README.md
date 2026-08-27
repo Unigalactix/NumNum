@@ -33,11 +33,33 @@ Progress is saved in the browser (localStorage), and there's a mute toggle and a
 
 ## Daily love notes
 
-The navbar bell opts a browser into two daily push notifications in each
+The navbar bell opts a browser into three daily push notifications in each
 subscriber's local time: a loving morning note near 9:00 AM and an encouraging
-afternoon note at a daily-varying time between 3:00 PM and 5:30 PM. Both original
-1,000-message collections are generated in `src/loveNotes.js`; the OneSignal
-sender is `scripts/send-love-note.mjs`.
+afternoon note at a daily-varying time between 3:00 PM and 5:30 PM. A third
+text-only playful note arrives at a daily-varying time from 6:00 PM through
+11:59 PM. The two original 1,000-message collections are generated in
+`src/loveNotes.js`; the OneSignal sender is `scripts/send-love-note.mjs`.
+
+Notifications use a diorama-based icon, a transparent heart badge, and one
+**Open NumNum** action. Rich artwork appears occasionally (and on Tinglish
+notes) so it stays special. Every rich Chrome notification uses an individual
+banner from `assets/stickers/notification/`, never a complete sticker sheet.
+The selected sticker ID is included in the message metadata.
+Tinglish appears once per week on Sunday, alternating between the morning and
+afternoon slot. The other 13 weekly notifications are English.
+Safari uses the installed NumNum app icon plus the same concise title, emoji,
+message, and click-through URL. Apple does not support web action buttons or
+Chrome-style rich notification images, so those enhancements degrade quietly.
+Regenerate these assets after changing the diorama with:
+
+```powershell
+./scripts/generate-notification-assets.ps1
+./scripts/extract-stickers.ps1
+```
+
+The sticker extractor creates 79 transparent PNGs for the album, rewards, and
+Memory Match, plus 79 porcelain notification cards. Generated files live under
+`public/assets/stickers/individual/` and `public/assets/stickers/notification/`.
 
 1. Create a **Custom Code** Web app in OneSignal. Use the site origin
    `https://unigalactix.github.io` and enable Auto Resubscribe. The SDK uses the

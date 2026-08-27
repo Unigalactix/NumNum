@@ -4,6 +4,36 @@
 //  the filenames in `photos` to use real pictures in the games.
 // ─────────────────────────────────────────────────────────────
 
+const STICKER_PAGE_DEFINITIONS = [
+  { key: 'sheet1', source: 'assets/stickers/sheet.png', count: 15, title: 'Everyday Us', caption: 'the little moments 💗' },
+  { key: 'sheet2', source: 'assets/stickers/sheet2.png', count: 6, title: 'Silly Little Days', caption: 'our goofy side 🥰' },
+  { key: 'sheet3', source: 'assets/stickers/sheet3.png', count: 8, title: 'Us, Being Us', caption: 'just the two of us 💞' },
+  { key: 'sheet4', source: 'assets/stickers/sheet4.png', count: 8, title: 'Pinch, Honk & Giggles', caption: 'endless teasing 😆' },
+  { key: 'sheet5', source: 'assets/stickers/sheet5.png', count: 8, title: 'Your Daily Cuteness', caption: 'you, all day long ☕' },
+  { key: 'sheet6', source: 'assets/stickers/sheet6.png', count: 4, title: 'More of Our Moments', caption: 'a few more of us 💫' },
+  { key: 'sheet7', source: 'assets/stickers/sheet7.png', count: 8, title: 'Cozy Date Nights', caption: 'stay-in dates 🕯️' },
+  { key: 'sheet8', source: 'assets/stickers/sheet8.png', count: 6, title: 'Boba Thefts & Teasing', caption: 'mine now! 🧋' },
+  { key: 'sheet9', source: 'assets/stickers/sheet9.png', count: 8, title: 'Our LA Adventure', caption: 'city of angels 🌴' },
+  { key: 'sheet10', source: 'assets/stickers/sheet10.png', count: 8, title: 'Our Seattle Trip', caption: 'rainy-day us ☔' },
+]
+
+export const stickerPages = STICKER_PAGE_DEFINITIONS.map((page) => ({
+  ...page,
+  stickers: Array.from({ length: page.count }, (_, index) => {
+    const number = String(index + 1).padStart(2, '0')
+    const id = `${page.key}-${number}`
+    return {
+      id,
+      file: `assets/stickers/individual/${id}.png`,
+      label: `${page.title}, sticker ${index + 1}`,
+      notificationFile: `assets/stickers/notification/${id}.jpg`,
+      page: page.key,
+    }
+  }),
+}))
+
+export const stickerCollection = stickerPages.flatMap((page) => page.stickers)
+
 export const content = {
   her: { name: 'Neha', nickname: 'Num Num' },
 
@@ -35,49 +65,10 @@ export const content = {
   // public/assets/diorama.jpg (or set to null to fall back to gradient tiles).
   puzzleImage: 'assets/diorama.jpg',
 
-  // Chibi-sticker "Sticker Book" 💗
-  // You provided a single sticker SHEET, so we slice it like a sprite map.
-  // Save that sheet as public/assets/stickers/sheet.png (a 3-column × 5-row grid).
-  // Each sticker below maps to a cell by row (r) and column (c), 0-indexed.
-  // If the sheet is missing, the cute emoji placeholder shows instead.
-  stickerSheet: {
-    file: 'assets/stickers/sheet.png',
-    cols: 3,
-    rows: 5,
-    cellAspectRatio: 1.25,
-  },
-  stickers: [
-    { r: 0, c: 0, emoji: '🤗', caption: 'Warm hugs' },
-    { r: 0, c: 1, emoji: '🍳', caption: 'Cooking chaos together' },
-    { r: 0, c: 2, emoji: '🙌', caption: 'High-five — team us!' },
-    { r: 1, c: 0, emoji: '😚', caption: 'Cheek kisses' },
-    { r: 1, c: 1, emoji: '💻', caption: 'Work-from-home dates' },
-    { r: 1, c: 2, emoji: '🫂', caption: 'Back hugs' },
-    { r: 2, c: 0, emoji: '🤳', caption: 'Selfie moments' },
-    { r: 2, c: 1, emoji: '❤️', caption: 'You have my whole heart' },
-    { r: 2, c: 2, emoji: '👍', caption: 'We got this' },
-    { r: 3, c: 0, emoji: '🎁', caption: 'Gifts & ice cream' },
-    { r: 3, c: 1, emoji: '🐨', caption: 'Piggyback rides' },
-    { r: 3, c: 2, emoji: '🤝', caption: 'Holding hands everywhere' },
-    { r: 4, c: 0, emoji: '🌙', caption: 'Stargazing nights' },
-    { r: 4, c: 1, emoji: '🧋', caption: 'Miss you' },
-    { r: 4, c: 2, emoji: '📖', caption: 'Cozy reading cuddles' },
-  ],
-
-  // Sticker Book album — each sheet is shown as a full, flip-through page.
-  // Drop more sheets into public/assets/stickers/ and add a line here.
-  stickerPages: [
-    { file: 'assets/stickers/sheet.png', title: 'Everyday Us', caption: 'the little moments 💗' },
-    { file: 'assets/stickers/sheet2.png', title: 'Silly Little Days', caption: 'our goofy side 🥰' },
-    { file: 'assets/stickers/sheet3.png', title: 'Us, Being Us', caption: 'just the two of us 💞' },
-    { file: 'assets/stickers/sheet4.png', title: 'Pinch, Honk & Giggles', caption: 'endless teasing 😆' },
-    { file: 'assets/stickers/sheet5.png', title: 'Your Daily Cuteness', caption: 'you, all day long ☕' },
-    { file: 'assets/stickers/sheet6.png', title: 'More of Our Moments', caption: 'a few more of us 💫' },
-    { file: 'assets/stickers/sheet7.png', title: 'Cozy Date Nights', caption: 'stay-in dates 🕯️' },
-    { file: 'assets/stickers/sheet8.png', title: 'Boba Thefts & Teasing', caption: 'mine now! 🧋' },
-    { file: 'assets/stickers/sheet9.png', title: 'Our LA Adventure', caption: 'city of angels 🌴' },
-    { file: 'assets/stickers/sheet10.png', title: 'Our Seattle Trip', caption: 'rainy-day us ☔' },
-  ],
+  // Individual stickers are generated from every source sheet with
+  // scripts/extract-stickers.ps1.
+  stickerPages,
+  stickerCollection,
 
   // Memory-match uses these pairs (emoji fallback if no photos)
   memoryEmojis: ['💖', '🥐', '📺', '🐕', '🎀', '⭐'],

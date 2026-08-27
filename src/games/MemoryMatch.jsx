@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
-import { useStickerSheet } from '../hooks/useStickerSheet'
-import { spriteCellStyle } from '../lib/sprite'
 
 const PAIRS = 6
 
@@ -19,10 +17,8 @@ function shuffle(arr) {
 export default function MemoryMatch({ onComplete }) {
   const play = useSound()
 
-  const { sheet, sheetUrl, sheetOk } = useStickerSheet()
-
   // deck holds pair keys 0..5 (doubled + shuffled); the face is chosen at render
-  const stickers = content.stickers.slice(0, PAIRS)
+  const stickers = useMemo(() => shuffle(content.stickerCollection).slice(0, PAIRS), [])
   const emojis = content.memoryEmojis
   const deck = useMemo(() => {
     const keys = Array.from({ length: PAIRS }, (_, k) => k)
@@ -78,7 +74,6 @@ export default function MemoryMatch({ onComplete }) {
         {deck.map((card, idx) => {
           const isUp = flipped.includes(idx) || matched.includes(card.id)
           const sticker = stickers[card.key]
-          const showSticker = sheetOk && sticker
           return (
             <button
               key={card.id}
@@ -116,10 +111,11 @@ export default function MemoryMatch({ onComplete }) {
                     transform: 'rotateY(180deg)',
                   }}
                 >
-                  {showSticker ? (
-                    <div
-                      className="w-full"
-                      style={spriteCellStyle(sheetUrl, sheet, sticker.r, sticker.c)}
+                  {sticker ? (
+                    <img
+                      src={`${import.meta.env.BASE_URL}${sticker.file}`}
+                      alt=""
+                      className="h-full w-full p-1 object-contain"
                     />
                   ) : (
                     emojis[card.key]

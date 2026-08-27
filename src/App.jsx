@@ -3,8 +3,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, Heart, RotateCcw } from 'lucide-react'
 import { content } from './content'
 import { DAY_MS, useStore } from './store'
-import { useStickerSheet } from './hooks/useStickerSheet'
-import { spriteCellStyle } from './lib/sprite'
 import { pageTransition, spring, tap } from './lib/motion'
 
 import GrainOverlay from './components/GrainOverlay'
@@ -87,8 +85,6 @@ export default function App() {
   const [askReset, setAskReset] = useState(false) // styled "start over?" confirm
   const [splash, setSplash] = useState(!reduce) // brief intro splash on first load
   const [cycleReady, setCycleReady] = useState(false)
-
-  const { sheet, sheetUrl, sheetOk } = useStickerSheet()
 
   // A new featured letter or a completed 24-hour cycle starts the site fresh.
   useEffect(() => {
@@ -183,7 +179,7 @@ export default function App() {
     // only celebrate the first time a game is finished — replays return quietly
     if (!alreadyDone) {
       setNote(content.notes[id])
-      const list = content.stickers
+      const list = content.stickerCollection
       setNoteSticker(list?.length ? list[Math.floor(Math.random() * list.length)] : null)
       setCelebrate(true)
       setTimeout(() => setCelebrate(false), 2200)
@@ -293,13 +289,14 @@ export default function App() {
       <Modal open={!!note} onClose={() => setNote(null)}>
         {note && (
           <div className="text-center">
-            {sheetOk && noteSticker ? (
-              <motion.div
+            {noteSticker ? (
+              <motion.img
                 initial={{ scale: 0, rotate: -12 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={spring}
-                className="mx-auto mb-3 w-36 max-w-full"
-                style={spriteCellStyle(sheetUrl, sheet, noteSticker.r, noteSticker.c)}
+                src={`${import.meta.env.BASE_URL}${noteSticker.file}`}
+                alt={noteSticker.label}
+                className="mx-auto mb-3 h-36 w-36 object-contain"
               />
             ) : (
               <span className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-lg bg-blush/70 text-wine">

@@ -12,18 +12,23 @@ export default function StickerBook({ onClose }) {
   const pages = content.stickerPages || []
   const [index, setIndex] = useState(0)
   const [dir, setDir] = useState(0)
-  const [zoom, setZoom] = useState(false)
+  const [zoomSticker, setZoomSticker] = useState(null)
   const [failed, setFailed] = useState({})
   const [loaded, setLoaded] = useState({})
   const zoomRef = useRef(null)
 
   const page = pages[index]
   const total = pages.length
+  const galleryHeight = page?.stickers.length > 12
+    ? 'min-h-[34rem] sm:min-h-[60rem]'
+    : page?.stickers.length > 6
+      ? 'min-h-[24rem] sm:min-h-[38rem]'
+      : 'min-h-[18rem] sm:min-h-[26rem]'
 
   useEffect(() => {
-    if (!zoom) return
+    if (!zoomSticker) return
     zoomRef.current?.focus()
-  }, [zoom])
+  }, [zoomSticker])
 
   const go = (next) => {
     if (total < 2) return
@@ -60,7 +65,7 @@ export default function StickerBook({ onClose }) {
         <>
           <div className="mt-12 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="surface relative mx-auto w-full max-w-[38rem] rounded-xl p-2.5 sm:p-4">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-white">
+            <div className={`relative overflow-hidden rounded-lg bg-[#fffdf9] p-4 sm:p-6 ${galleryHeight}`}>
               <AnimatePresence mode="popLayout" custom={dir}>
                 <motion.div
                   key={index}
@@ -69,45 +74,45 @@ export default function StickerBook({ onClose }) {
                   animate={{ opacity: 1, x: 0, rotate: 0 }}
                   exit={{ opacity: 0, x: dir >= 0 ? -60 : 60, rotate: dir >= 0 ? -2 : 2 }}
                   transition={spring}
-                  className="absolute inset-0 grid place-items-center p-2 sm:p-4"
+                  className="absolute inset-0 grid grid-cols-3 content-center gap-3 p-4 sm:gap-4 sm:p-6"
                 >
-                  {failed[index] ? (
-                    <div className="text-center">
-                      <ImageOff size={32} className="mx-auto text-muted" aria-hidden="true" />
-                      <p className="mt-3 text-sm font-semibold text-muted">
-                        couldn’t load this page
-                      </p>
-                    </div>
-                  ) : (
+                  {page.stickers.map((sticker, stickerIndex) => (
                     <button
+                      key={sticker.id}
                       onClick={() => {
                         play('pop')
-                        setZoom(true)
+                        setZoomSticker({ ...sticker, index: stickerIndex })
                       }}
-                      className="relative h-full w-full cursor-zoom-in"
-                      aria-label={`Zoom ${page.title}`}
+                      className="group relative grid aspect-square min-h-0 place-items-center overflow-hidden rounded-lg border border-[#e4dde0] bg-white/75 p-2 transition hover:border-wine/35 hover:bg-white"
+                      aria-label={`Open ${sticker.label}`}
                     >
-                      {!loaded[index] && <span className="skeleton absolute inset-0 rounded-2xl" />}
+                      {!loaded[sticker.id] && !failed[sticker.id] && (
+                        <span className="skeleton absolute inset-0" />
+                      )}
+                      {failed[sticker.id] ? (
+                        <ImageOff size={24} className="text-muted" aria-hidden="true" />
+                      ) : (
                       <img
-                        src={pageUrl(page.file)}
-                        alt={page.title}
-                        loading="eager"
-                        onLoad={() => setLoaded((state) => ({ ...state, [index]: true }))}
-                        onError={() => setFailed((state) => ({ ...state, [index]: true }))}
-                        className={`h-full w-full object-contain transition-opacity duration-300 ${
-                          loaded[index] ? 'opacity-100' : 'opacity-0'
+                        src={pageUrl(sticker.file)}
+                        alt=""
+                        loading="lazy"
+                        onLoad={() => setLoaded((state) => ({ ...state, [sticker.id]: true }))}
+                        onError={() => setFailed((state) => ({ ...state, [sticker.id]: true }))}
+                        className={`h-full w-full object-contain transition duration-300 group-hover:scale-[1.04] ${
+                          loaded[sticker.id] ? 'opacity-100' : 'opacity-0'
                         }`}
                       />
-                      <span className="icon-button absolute bottom-3 right-3 bg-white" aria-hidden="true">
-                        <Maximize2 size={17} />
+                      )}
+                      <span className="absolute bottom-2 right-2 grid h-7 w-7 place-items-center rounded-lg border border-[#e4dde0] bg-white/90 text-wine opacity-0 transition group-hover:opacity-100" aria-hidden="true">
+                        <Maximize2 size={14} />
                       </span>
                     </button>
-                  )}
+                  ))}
                 </motion.div>
               </AnimatePresence>
 
-              <NavButton dir="prev" onClick={() => go(index - 1)} disabled={total < 2} />
-              <NavButton dir="next" onClick={() => go(index + 1)} disabled={total < 2} />
+              <NavButton key="previous-page" dir="prev" onClick={() => go(index - 1)} disabled={total < 2} />
+              <NavButton key="next-page" dir="next" onClick={() => go(index + 1)} disabled={total < 2} />
             </div>
           </div>
 
@@ -115,11 +120,14 @@ export default function StickerBook({ onClose }) {
             <p className="editorial-label">Page {index + 1} of {total}</p>
             <h2 className="mt-3 font-display text-3xl leading-tight text-ink">{page.title}</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">{page.caption}</p>
+            <p className="mt-2 text-xs font-semibold uppercase text-sage" style={{ letterSpacing: '0.1em' }}>
+              {page.stickers.length} individual stickers
+            </p>
 
             <div className="mt-8 grid gap-1">
               {pages.map((item, pageIndex) => (
                 <button
-                  key={item.file}
+                  key={item.key}
                   onClick={() => {
                     if (pageIndex === index) return
                     play('flip')
@@ -141,16 +149,16 @@ export default function StickerBook({ onClose }) {
         </>
       )}
 
-      {zoom && page && !failed[index] && (
+      {zoomSticker && (
         <div
           ref={zoomRef}
           role="dialog"
           aria-modal="true"
-          aria-label={`${page.title} enlarged`}
+          aria-label={`${zoomSticker.label} enlarged`}
           tabIndex={-1}
-          onClick={() => setZoom(false)}
+          onClick={() => setZoomSticker(null)}
           onKeyDown={(event) => {
-            if (event.key === 'Escape') setZoom(false)
+            if (event.key === 'Escape') setZoomSticker(null)
           }}
           className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4 outline-none backdrop-blur-[2px]"
         >
@@ -162,18 +170,23 @@ export default function StickerBook({ onClose }) {
             className="surface relative flex max-h-[90vh] w-full max-w-2xl flex-col items-center gap-4 rounded-xl p-5 shadow-soft sm:p-8"
           >
             <button
-              onClick={() => setZoom(false)}
+              onClick={() => setZoomSticker(null)}
               aria-label="Close enlarged sticker page"
               className="icon-button absolute right-3 top-3 bg-white"
             >
               <X size={18} aria-hidden="true" />
             </button>
             <img
-              src={pageUrl(page.file)}
-              alt={page.title}
-              className="max-h-[68vh] max-w-full rounded-lg bg-white object-contain shadow-soft"
+              src={pageUrl(zoomSticker.file)}
+              alt={zoomSticker.label}
+              className="max-h-[68vh] max-w-full object-contain"
             />
-            <h3 className="font-display text-2xl text-ink">{page.title}</h3>
+            <div className="text-center">
+              <p className="editorial-label">{page.title}</p>
+              <h3 className="mt-1 font-display text-2xl text-ink">
+                Sticker {zoomSticker.index + 1} of {page.stickers.length}
+              </h3>
+            </div>
           </motion.div>
         </div>
       )}
