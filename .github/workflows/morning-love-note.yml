@@ -2,7 +2,7 @@ name: Send daily love notes
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '7 0 * * *'
   workflow_dispatch:
     inputs:
       dry_run:

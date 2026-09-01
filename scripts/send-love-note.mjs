@@ -9,6 +9,8 @@ import {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const DEFAULT_APP_ID = 'a8eaa49d-51c4-426f-8bcb-63bd36f32b5a'
+const MAX_SEND_ATTEMPTS = 3
+const RETRYABLE_STATUS_CODES = new Set([408, 425, 429])
 const AFTERNOON_TIMES = [
   '3:00PM',
   '3:15PM',
@@ -86,6 +88,45 @@ const richImageUrl = sticker ? new URL(sticker.notificationFile, siteUrl).href :
 const headingEmoji = note.isTinglish ? '💞' : isAfternoon ? '💗' : '☀️'
 const iconUrl = notificationAssetUrl('notification-icon.png')
 
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
+
+async function createNotification(payload) {
+  for (let attempt = 1; attempt <= MAX_SEND_ATTEMPTS; attempt += 1) {
+    let response
+
+    try {
+      response = await fetch('https://api.onesignal.com/notifications', {
+        method: 'POST',
+        headers: {
+          Authorization: `Key ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+    } catch (error) {
+      if (attempt === MAX_SEND_ATTEMPTS) throw error
+      await wait(1000 * 2 ** (attempt - 1))
+      continue
+    }
+
+    const result = await response.json().catch(() => ({}))
+    if (response.ok && !result.errors) return result
+
+    const retryable = RETRYABLE_STATUS_CODES.has(response.status) || response.status >= 500
+    if (!retryable || attempt === MAX_SEND_ATTEMPTS) {
+      throw new Error(`OneSignal rejected the notification: ${JSON.stringify(result)}`)
+    }
+
+    const retryAfter = Number(response.headers.get('retry-after'))
+    const delay = Number.isFinite(retryAfter) && retryAfter > 0
+      ? retryAfter * 1000
+      : 1000 * 2 ** (attempt - 1)
+    await wait(delay)
+  }
+
+  throw new Error('OneSignal notification retries were exhausted.')
+}
+
 if (isNight && (NIGHT_MESSAGES.length !== 7 || new Set(NIGHT_MESSAGES).size !== 7)) {
   throw new Error('The night message collection must contain exactly 7 unique messages.')
 }
@@ -112,6 +153,7 @@ const notification = {
   },
   delivery_time_of_day: deliveryTime,
   delayed_option: 'timezone',
+  throttle_rate_per_minute: 0,
   filters: [
     { field: 'tag', key: 'morning_love_notes', relation: '=', value: 'enabled' },
   ],
@@ -144,19 +186,7 @@ if (!appId || !apiKey) {
   throw new Error('ONESIGNAL_APP_ID and ONESIGNAL_REST_API_KEY are required to send notifications.')
 }
 
-const response = await fetch('https://api.onesignal.com/notifications', {
-  method: 'POST',
-  headers: {
-    Authorization: `Key ${apiKey}`,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(notification),
-})
-
-const result = await response.json()
-if (!response.ok || result.errors) {
-  throw new Error(`OneSignal rejected the notification: ${JSON.stringify(result)}`)
-}
+const result = await createNotification(notification)
 
 if (!result.id) {
   throw new Error(`OneSignal found no eligible ${period} love-note subscribers.`)

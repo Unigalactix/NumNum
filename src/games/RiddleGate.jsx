@@ -1,42 +1,68 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, Eye, KeyRound, Lightbulb } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Delete, KeyRound } from 'lucide-react'
 import { content } from '../content'
 import { useStore } from '../store'
 import { useSound } from '../hooks/useSound'
 
-const normalize = (s) =>
-  s.toLowerCase().replace(/[^a-z0-9]/g, '').trim()
+const PASSCODE_LENGTH = 6
+const KEYPAD = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 export default function RiddleGate() {
   const { gate, site, her } = content
   const enter = useStore((s) => s.enter)
   const play = useSound()
   const [value, setValue] = useState('')
-  const [showHint, setShowHint] = useState(false)
-  const [showAnswer, setShowAnswer] = useState(false)
   const [error, setError] = useState(false)
-  const [almost, setAlmost] = useState(false)
   const [ok, setOk] = useState(false)
 
-  const submit = (e) => {
-    e.preventDefault()
-    const guess = normalize(value)
-    const accepted = (gate.answers || [gate.answer]).map(normalize)
-    if (accepted.includes(guess)) {
+  const submit = () => {
+    if (value.length !== PASSCODE_LENGTH || ok) return
+
+    if (value === gate.passcode) {
       play('unlock')
       setError(false)
-      setAlmost(false)
       setOk(true)
       setTimeout(() => enter(), 1900)
     } else {
       play('error')
-      // “Spider Man” alone isn't enough — nudge her gently to add the rest.
-      setAlmost(guess.includes('spiderman') && !guess.includes('brandnewday'))
       setError(true)
-      setTimeout(() => setError(false), 600)
+      setTimeout(() => {
+        setError(false)
+        setValue('')
+      }, 600)
     }
   }
+
+  const appendDigit = (digit) => {
+    if (ok) return
+    setError(false)
+    setValue((current) => `${current}${digit}`.slice(0, PASSCODE_LENGTH))
+  }
+
+  const removeDigit = () => {
+    if (ok) return
+    setError(false)
+    setValue((current) => current.slice(0, -1))
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault()
+        appendDigit(event.key)
+      } else if (event.key === 'Backspace' || event.key === 'Delete') {
+        event.preventDefault()
+        removeDigit()
+      } else if (event.key === 'Enter') {
+        event.preventDefault()
+        submit()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  })
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_minmax(28rem,0.85fr)]">
@@ -85,76 +111,87 @@ export default function RiddleGate() {
               {gate.question}
             </p>
 
-            <form onSubmit={submit} className="mt-6">
-              <motion.input
-                autoFocus
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="type your answer…"
+            <div className="mt-6">
+              <motion.div
+                role="status"
+                aria-label={`${value.length} of ${PASSCODE_LENGTH} passcode digits entered`}
                 animate={error ? { x: [0, -10, 10, -8, 8, 0] } : {}}
                 transition={{ duration: 0.5 }}
-                className={`w-full rounded-lg border bg-white px-4 py-3.5 text-left text-base text-ink outline-none transition ${
+                className={`grid grid-cols-6 gap-2 rounded-lg border bg-white p-3 transition ${
                   error
                     ? 'border-rose'
-                    : 'border-[#d8ced2] focus:border-wine'
+                    : 'border-[#d8ced2]'
                 }`}
-              />
-              <button type="submit" className="btn mt-4 w-full">
+              >
+                {Array.from({ length: PASSCODE_LENGTH }, (_, index) => (
+                  <span
+                    key={index}
+                    aria-hidden="true"
+                    className={`grid aspect-square place-items-center rounded-md border text-xl transition sm:text-2xl ${
+                      index < value.length
+                        ? 'border-wine/40 bg-blush/60 text-wine'
+                        : 'border-[#e4dde0] bg-[#fcfafb] text-transparent'
+                    }`}
+                  >
+                    {index < value.length ? '•' : '0'}
+                  </span>
+                ))}
+              </motion.div>
+
+              <div className="mx-auto mt-4 grid max-w-xs grid-cols-3 gap-2" aria-label="Passcode keypad">
+                {KEYPAD.map((digit) => (
+                  <button
+                    key={digit}
+                    type="button"
+                    onClick={() => {
+                      play('click')
+                      appendDigit(digit)
+                    }}
+                    className="grid h-12 place-items-center rounded-lg border border-[#d8ced2] bg-white text-lg font-semibold text-ink transition hover:border-wine hover:text-wine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wine focus-visible:ring-offset-2"
+                    aria-label={`Enter ${digit}`}
+                  >
+                    {digit}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={removeDigit}
+                  className="grid h-12 place-items-center rounded-lg border border-[#d8ced2] bg-white text-muted transition hover:border-wine hover:text-wine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wine focus-visible:ring-offset-2"
+                  aria-label="Remove last digit"
+                >
+                  <ArrowLeft size={19} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    play('click')
+                    appendDigit('0')
+                  }}
+                  className="grid h-12 place-items-center rounded-lg border border-[#d8ced2] bg-white text-lg font-semibold text-ink transition hover:border-wine hover:text-wine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wine focus-visible:ring-offset-2"
+                  aria-label="Enter 0"
+                >
+                  0
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue('')}
+                  className="grid h-12 place-items-center rounded-lg border border-[#d8ced2] bg-white text-muted transition hover:border-wine hover:text-wine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wine focus-visible:ring-offset-2"
+                  aria-label="Clear passcode"
+                >
+                  <Delete size={19} aria-hidden="true" />
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={submit}
+                disabled={value.length !== PASSCODE_LENGTH}
+                className="btn mt-4 w-full disabled:cursor-not-allowed disabled:opacity-45"
+              >
                 Unlock archive
                 <ArrowRight size={17} aria-hidden="true" />
               </button>
-            </form>
-
-            {almost && (
-              <motion.p
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 text-sm leading-relaxed text-wine"
-              >
-                {gate.almost}
-              </motion.p>
-            )}
-
-            <button
-              onClick={() => {
-                play('click')
-                setShowHint(true)
-              }}
-              className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-wine"
-            >
-              <Lightbulb size={16} aria-hidden="true" />
-              Need a hint?
-            </button>
-
-            {showHint && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-5 border-t border-[#e4dde0] pt-5"
-              >
-                <p className="font-display text-xl italic text-ink">
-                  Seriously? You were asking for a hint on this question? 😏
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{gate.hint}</p>
-
-                {showAnswer ? (
-                  <p className="mt-4 text-sm font-semibold text-wine">
-                    It's {gate.answer} 🎬💕
-                  </p>
-                ) : (
-                  <button
-                    onClick={() => {
-                      play('click')
-                      setShowAnswer(true)
-                    }}
-                    className="btn-ghost mt-3 text-sm"
-                  >
-                    <Eye size={16} aria-hidden="true" />
-                    reveal answer
-                  </button>
-                )}
-              </motion.div>
-            )}
+            </div>
           </>
         )}
       </motion.div>

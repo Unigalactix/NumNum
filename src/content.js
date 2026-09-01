@@ -42,16 +42,11 @@ export const content = {
     tagline: 'a tiny universe I built, just for you 💗',
   },
 
-  // The entry gate — she must answer this to open the site
+  // The entry gate — she must enter the passcode to open the site.
   gate: {
-    question: 'Before you come in… answer this. What was the first movie we watched in a theatre?',
-    // Any of these (case/spacing/punctuation-insensitive) unlocks the gate.
-    answers: ['Spider Man Brand New Day', 'Brand New Day'],
-    answer: 'Spider-Man: Brand New Day',
-    // Shown when she types just “Spider Man” without the rest.
-    almost: 'So close, my love 🥰 you’ve got the hero right… now give me the rest of it 💫',
-    hint: 'Okay okay… our very first theatre date 🎬🍿 — you totally know this one 💗',
-    success: 'Yesss — that’s the one. Come in, my love… 💕',
+    question: 'Before you come in… enter our six-digit passcode.',
+    passcode: '081974',
+    success: 'That’s it. Come in, my love… 💕',
   },
 
   // Photos: drop files into /public/assets and list them here.
@@ -77,6 +72,7 @@ export const content = {
     { emoji: '🥐', label: 'Raspberry croissants' },
     { emoji: '📺', label: 'Shin-chan' },
     { emoji: '🐕', label: 'Golden retrievers' },
+    { emoji: '💜', label: 'Purple' },
   ],
 
   // Reasons revealed by the Love Meter game
@@ -264,7 +260,7 @@ export const content = {
       emoji: '🧖‍♀️',
       title: 'Face masks as a couple and the Rahul Subramanian show',
     },
-    { date: 'August 15th, 2026', emoji: '⛵', title: 'Our first boat ride' },
+    { date: 'August 15th, 2026', emoji: '⛵', title: 'Our first ferry ride to Bainbridge Island' },
     {
       date: 'August 16th & 17th, 2026',
       emoji: '🎂',
@@ -284,6 +280,26 @@ export const content = {
       emoji: '🐕',
       title: 'Num Num’s half birthday',
       detail: 'A little celebration for my favorite girl. 💗',
+    },
+    {
+      date: 'August 27th, 2026',
+      emoji: '♟️',
+      title: 'We played chess on a big public board',
+      detail: 'A playful match in South Lake Union.',
+    },
+    {
+      date: 'August 30th, 2026',
+      emoji: '🎨',
+      title: 'We had our couple caricature drawn',
+      detail: 'Then we spent the day together in the U-District.',
+      image: 'assets/caricature.png',
+      imageAlt: 'Couple caricature of Rajesh and Neha with the Seattle skyline and Space Needle',
+    },
+    {
+      date: 'September 1st, 2026',
+      emoji: '🚗',
+      title: 'You passed your driving knowledge test',
+      detail: 'And you skipped your shower 😛',
     },
   ],
 

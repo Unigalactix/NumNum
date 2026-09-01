@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowLeft, CalendarHeart } from 'lucide-react'
+import { ArrowLeft, CalendarHeart, Image as ImageIcon } from 'lucide-react'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
 import { gentle, pageTransition, tap } from '../lib/motion'
+import Modal from './Modal'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -19,6 +21,7 @@ export default function HistoryOfUs({ onClose }) {
   const reduceMotion = useReducedMotion()
   const moments = content.history || []
   const favorites = content.favorites || []
+  const [selectedImage, setSelectedImage] = useState(null)
 
   return (
     <div className="mx-auto max-w-5xl overflow-x-hidden px-5 pb-24 pt-10 sm:px-6 sm:pt-14">
@@ -58,7 +61,7 @@ export default function HistoryOfUs({ onClose }) {
           <h2 id="favorite-things-title" className="editorial-label">
             Num Num’s favorite things
           </h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {favorites.map((favorite) => (
               <div
                 key={favorite.label}
@@ -117,6 +120,19 @@ export default function HistoryOfUs({ onClose }) {
                           {daysSince(moment.since)} days {moment.countLabel}
                         </p>
                       )}
+                      {moment.image && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            play('click')
+                            setSelectedImage(moment)
+                          }}
+                          className="btn-ghost mt-4 text-sm"
+                        >
+                          <ImageIcon size={16} aria-hidden="true" />
+                          View caricature
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -143,6 +159,22 @@ export default function HistoryOfUs({ onClose }) {
       >
         And we’re only getting started.
       </motion.div>
+
+      <Modal open={!!selectedImage} onClose={() => setSelectedImage(null)} wide>
+        {selectedImage && (
+          <div>
+            <p className="editorial-label pr-12 text-wine">{selectedImage.date}</p>
+            <h2 className="mt-2 pr-12 font-display text-3xl leading-tight text-ink">
+              {selectedImage.title}
+            </h2>
+            <img
+              src={selectedImage.image}
+              alt={selectedImage.imageAlt || ''}
+              className="mt-5 max-h-[72vh] w-full rounded-lg object-contain"
+            />
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

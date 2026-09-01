@@ -41,6 +41,7 @@ export function initializeNotifications() {
       appId: oneSignalAppId,
       allowLocalhostAsSecureOrigin: true,
       autoResubscribe: true,
+      persistNotification: true,
       serviceWorkerPath: serviceWorkerPath(),
       serviceWorkerParam: { scope: `${import.meta.env.BASE_URL}push/onesignal/` },
       welcomeNotification: { disable: true },
