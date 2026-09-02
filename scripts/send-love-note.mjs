@@ -153,7 +153,6 @@ const notification = {
   },
   delivery_time_of_day: deliveryTime,
   delayed_option: 'timezone',
-  throttle_rate_per_minute: 0,
   filters: [
     { field: 'tag', key: 'morning_love_notes', relation: '=', value: 'enabled' },
   ],
