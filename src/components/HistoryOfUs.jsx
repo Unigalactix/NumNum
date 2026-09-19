@@ -130,7 +130,7 @@ export default function HistoryOfUs({ onClose }) {
                           className="btn-ghost mt-4 text-sm"
                         >
                           <ImageIcon size={16} aria-hidden="true" />
-                          View caricature
+                          {moment.imageLabel || 'View photo'}
                         </button>
                       )}
                     </div>

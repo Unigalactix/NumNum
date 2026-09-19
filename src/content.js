@@ -307,6 +307,7 @@ export const content = {
       detail: 'Then we spent the day together in the U-District.',
       image: 'assets/caricature.png',
       imageAlt: 'Couple caricature of Rajesh and Neha with the Seattle skyline and Space Needle',
+      imageLabel: 'View caricature',
     },
     {
       date: 'September 1st, 2026',
@@ -328,12 +329,18 @@ export const content = {
       date: 'September 17th, 2026',
       emoji: '🪞',
       title: 'We visited the Museum of Illusions Seattle',
+      image: 'assets/museum-of-illusions.jpg',
+      imageAlt: 'Rajesh and Neha posing at a pin wall in the Museum of Illusions Seattle',
+      imageLabel: 'View museum photo',
     },
     {
       date: 'September 18th, 2026',
       emoji: '🛶',
       title: 'Moonlight kayaking on Lake Union',
       detail: 'A night on the water with Sergio.',
+      image: 'assets/lake-union-kayaking.jpg',
+      imageAlt: 'Neha, Rajesh, and Sergio kayaking under moonlight on Lake Union',
+      imageLabel: 'View kayaking photo',
     },
   ],
 
