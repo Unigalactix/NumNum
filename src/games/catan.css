@@ -1,0 +1,67 @@
+.catan-table { min-width: 0; letter-spacing: 0; }
+.catan-table button:disabled { cursor: not-allowed; opacity: .4; }
+.catan-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--color-line); }
+.catan-header h2 { font-family: Newsreader, serif; font-size: 28px; line-height: 1.15; margin: 5px 0; }
+.catan-eyebrow { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--color-muted); letter-spacing: 0; }
+.catan-edition { font-size: 11px; color: var(--color-muted); }
+.catan-header-actions { display: flex; gap: 8px; align-items: center; }
+.catan-die { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; width: 38px; height: 38px; padding: 7px; border: 1px solid #d2c5bd; border-radius: 7px; background: #fffdf9; box-shadow: 0 2px 0 #d2c5bd; }
+.catan-die i { border-radius: 50%; background: #54434a; }
+.catan-layout { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 20px; margin-top: 16px; }
+.catan-island { min-width: 0; }
+.catan-map-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.catan-map-tools > div { display: flex; gap: 6px; }
+.catan-map-scroll { width: 100%; max-height: 650px; overflow: auto; background: #a8d0d5; border-radius: 8px; border: 1px solid #90b8ba; }
+.catan-map { display: block; max-width: none; height: auto; font-family: Manrope, sans-serif; }
+.catan-target { cursor: pointer; }
+.catan-target:hover { filter: brightness(1.1); }
+.catan-target:focus-visible { outline: 3px solid #272126; outline-offset: 3px; }
+.catan-turnbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.catan-turnbar > span { flex: 1 1 180px; min-height: 36px; color: var(--color-muted); font-size: 12px; line-height: 1.5; }
+.catan-sidebar { padding-top: 12px; }
+.catan-player { border-bottom: 1px solid var(--color-line); padding: 16px 0; }
+.catan-player-active { box-shadow: inset 3px 0 var(--seat-color); padding-left: 10px; }
+.catan-player-title, .catan-player-title > span, .catan-player-title strong { display: flex; align-items: center; gap: 6px; }
+.catan-player-title { justify-content: space-between; font-size: 12px; font-weight: 800; }
+.catan-player-title > span { min-width: 0; flex-wrap: wrap; }
+.catan-player-title i { width: 8px; height: 8px; background: var(--seat-color); border-radius: 50%; flex-shrink: 0; }
+.catan-player-title strong { white-space: nowrap; }
+.catan-player-title small { font-weight: 500; color: var(--color-muted); }
+.catan-player-resources { display: flex; justify-content: space-between; margin-top: 9px; gap: 2px; }
+.catan-player-resources > span { display: flex; flex-direction: column; align-items: center; font-size: 11px; }
+.catan-log { margin-top: 18px; font-size: 12px; color: var(--color-muted); }
+.catan-log summary { cursor: pointer; font-weight: 700; }
+.catan-log li { border-bottom: 1px solid var(--color-line); padding: 9px 0; line-height: 1.5; }
+.catan-hand { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--color-line); }
+.catan-section-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.catan-section-heading > span { font-size: 12px; color: var(--color-muted); }
+.catan-resource-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 510px; }
+.catan-resource-card { display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 4/5; min-width: 0; border: 1px solid var(--terrain); border-top: 5px solid var(--terrain); background: #fffefa; background-image: repeating-linear-gradient(135deg, transparent 0 6px, #27212603 6px 7px); border-radius: 8px; box-shadow: 0 3px 0 #e4dde0; }
+.catan-resource-card svg { max-width: 85%; height: auto; }
+.catan-resource-card strong { font-size: 22px; line-height: 1.1; }
+.catan-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; border-top: 1px solid var(--color-line); margin-top: 24px; padding-top: 20px; }
+.catan-build-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.catan-build-options > button { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 98px; gap: 10px; padding: 12px 4px; border-radius: 8px; border: 1px solid var(--color-line); color: var(--color-wine); background: #fffefd; }
+.catan-build-options > button[aria-pressed='true'] { outline: 2px solid var(--color-wine); background: #f6e9ed; }
+.catan-cost { display: flex; flex-wrap: wrap; justify-content: center; }
+.catan-cost > span { display: flex; align-items: center; font-size: 11px; }
+.catan-trade fieldset { display: inline-block; margin: 10px 8px 8px 0; max-width: 100%; }
+.catan-trade legend { font-size: 11px; color: var(--color-muted); margin-bottom: 4px; }
+.catan-resource-picker { display: flex; gap: 4px; }
+.catan-resource-picker label { display: grid; place-items: center; width: 40px; height: 44px; position: relative; cursor: pointer; }
+.catan-resource-picker input { appearance: none; position: absolute; inset: 0; width: 100%; height: 100%; border: 1px solid var(--color-line); border-radius: 6px; cursor: pointer; }
+.catan-resource-picker input:checked { border: 2px solid var(--color-wine); background: #f6e9ed; }
+.catan-resource-picker svg { position: relative; pointer-events: none; }
+.catan-trade > button { display: flex; margin-top: 4px; }
+@media (max-width: 760px) {
+  .catan-layout { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .catan-sidebar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+  .catan-sidebar > h3, .catan-log { grid-column: 1 / -1; }
+  .catan-header h2 { font-size: 24px; }
+  .catan-actions { grid-template-columns: minmax(0, 1fr); }
+  .catan-resource-cards { gap: 6px; }
+  .catan-resource-card strong { font-size: 18px; }
+}
+@media (max-width: 380px) {
+  .catan-sidebar { grid-template-columns: minmax(0, 1fr); }
+}

@@ -47,6 +47,13 @@ const BONUS = [
   { id: 'duckhunt', icon: Crosshair, title: 'Mini Duck Hunt', desc: 'Catch ten targets' },
 ]
 
+const COUPLE_GAMES = [
+  { id: 'couple-ludo', icon: CircleDot, title: 'Ludo', desc: 'Bring every piece home', players: '2–4 players' },
+  { id: 'couple-catan', icon: Grid2X2, title: 'Catan', desc: 'Trade, build, and settle', players: '2–4 players' },
+  { id: 'couple-snakes', icon: Route, title: 'Snakes & Ladders', desc: 'Race to square 100', players: '2–4 players' },
+  { id: 'couple-chess', icon: Grid3X3, title: 'Chess', desc: 'A classic match for two', players: '2 players' },
+]
+
 const ALL_GAMES = [...GAMES, ...BONUS]
 const GAME_BY_ID = Object.fromEntries(ALL_GAMES.map((game) => [game.id, game]))
 
@@ -249,6 +256,49 @@ export default function Hub({
             </motion.div>
           )}
         </AnimatePresence>
+      </section>
+
+      <section className="mt-14 border-t border-[#e4dde0] pt-10" aria-labelledby="couple-games-title">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="editorial-label">Made for two</p>
+            <h2 id="couple-games-title" className="mt-1 font-display text-3xl text-ink sm:text-4xl">
+              Couple Games
+            </h2>
+          </div>
+          <p className="text-sm text-muted">Play together, with optional bot guests.</p>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          {COUPLE_GAMES.map((game, index) => {
+            const Icon = game.icon
+            return (
+              <motion.button
+                key={game.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.35 }}
+                transition={{ delay: index * 0.06 }}
+                whileHover={{ y: -3 }}
+                whileTap={tap}
+                onClick={() => {
+                  play('click')
+                  onOpenGame(game.id)
+                }}
+                className="surface group relative min-h-40 w-full rounded-xl p-5 text-left transition-colors hover:border-wine/35"
+              >
+                <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#e4eee8] text-sage transition-colors group-hover:bg-sage group-hover:text-white">
+                  <Icon size={20} strokeWidth={1.7} aria-hidden="true" />
+                </span>
+                <h3 className="mt-6 font-display text-2xl leading-tight text-ink">{game.title}</h3>
+                <p className="mt-1 text-sm text-muted">{game.desc}</p>
+                <span className="absolute right-4 top-4 text-[11px] font-bold uppercase text-muted" style={{ letterSpacing: '0.08em' }}>
+                  {game.players}
+                </span>
+              </motion.button>
+            )
+          })}
+        </div>
       </section>
 
       <AnimatePresence>

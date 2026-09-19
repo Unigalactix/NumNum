@@ -31,6 +31,12 @@ import ArrowTrail from './games/ArrowTrail'
 import SweetMatch from './games/SweetMatch'
 import PocketBlocks from './games/PocketBlocks'
 import DuckHunt from './games/DuckHunt'
+import Ludo from './games/Ludo'
+import CoupleCatan from './games/CoupleCatan'
+import SnakesAndLadders from './games/SnakesAndLadders'
+import CoupleChess from './games/CoupleChess'
+
+const COUPLE_GAME_IDS = new Set(['couple-ludo', 'couple-catan', 'couple-snakes', 'couple-chess'])
 
 const GAME_COMPONENTS = {
   memory: MemoryMatch,
@@ -48,6 +54,10 @@ const GAME_COMPONENTS = {
   sweetmatch: SweetMatch,
   pocketblocks: PocketBlocks,
   duckhunt: DuckHunt,
+  'couple-ludo': Ludo,
+  'couple-catan': CoupleCatan,
+  'couple-snakes': SnakesAndLadders,
+  'couple-chess': CoupleChess,
 }
 
 const GAME_TITLES = {
@@ -66,6 +76,10 @@ const GAME_TITLES = {
   sweetmatch: 'Sweet Match',
   pocketblocks: 'Pocket Blocks',
   duckhunt: 'Mini Duck Hunt',
+  'couple-ludo': 'Ludo',
+  'couple-catan': 'Catan',
+  'couple-snakes': 'Snakes & Ladders',
+  'couple-chess': 'Chess',
 }
 
 export default function App() {
@@ -274,7 +288,9 @@ export default function App() {
                 <ArrowLeft size={19} aria-hidden="true" />
               </motion.button>
               <div>
-                <p className="editorial-label">Today’s collection</p>
+                <p className="editorial-label">
+                  {COUPLE_GAME_IDS.has(view) ? 'Couple games' : 'Today’s collection'}
+                </p>
                 <h1 className="mt-1 font-display text-3xl text-ink sm:text-4xl">{GAME_TITLES[view]}</h1>
               </div>
             </div>

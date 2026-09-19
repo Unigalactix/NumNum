@@ -11,7 +11,9 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "chess.js": "^1.4.0",
     "framer-motion": "^11.3.24",
+    "honeycomb-grid": "^4.1.5",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
