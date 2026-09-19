@@ -69,9 +69,10 @@ export const content = {
   memoryEmojis: ['💖', '🥐', '📺', '🐕', '🎀', '⭐'],
 
   favorites: [
-    { emoji: '🥐', label: 'Raspberry croissants' },
-    { emoji: '📺', label: 'Shin-chan' },
-    { emoji: '🐕', label: 'Golden retrievers' },
+    { emoji: '🥐', label: 'Raspberry croissant' },
+    { emoji: '📺', label: 'Shin-chan cartoon' },
+    { emoji: '🐕', label: 'Golden retriever' },
+    { emoji: '🥞', label: 'Masala dosa' },
     { emoji: '💜', label: 'Purple' },
   ],
 
@@ -221,6 +222,18 @@ export const content = {
       since: '2026-04-03',
       countLabel: 'since we matched',
     },
+    {
+      date: 'April 11th, 2026',
+      emoji: '🎲',
+      title: 'Our first call and a game of Catan',
+      detail: 'We talked for 3 hours, 11 minutes, and 39 seconds.',
+    },
+    {
+      date: 'April 16th, 2026',
+      emoji: '📞',
+      title: 'Our second call',
+      detail: 'We talked for 4 hours, 7 minutes, and 1 second.',
+    },
     { date: 'May 15th, 2026', emoji: '🎓', title: 'You graduated from USC' },
     {
       date: 'May 16th, 2026',
@@ -300,6 +313,27 @@ export const content = {
       emoji: '🚗',
       title: 'You passed your driving knowledge test',
       detail: 'And you skipped your shower 😛',
+    },
+    {
+      date: 'September 3rd, 2026',
+      emoji: '🛕',
+      title: 'We visited the Redmond Sai Baba Temple',
+    },
+    {
+      date: 'September 6th, 2026',
+      emoji: '👗',
+      title: 'Nordstrom Rack dress trials',
+    },
+    {
+      date: 'September 17th, 2026',
+      emoji: '🪞',
+      title: 'We visited the Museum of Illusions Seattle',
+    },
+    {
+      date: 'September 18th, 2026',
+      emoji: '🛶',
+      title: 'Moonlight kayaking on Lake Union',
+      detail: 'A night on the water with Sergio.',
     },
   ],
 
