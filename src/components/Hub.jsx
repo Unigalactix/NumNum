@@ -49,7 +49,7 @@ const BONUS = [
 
 const COUPLE_GAMES = [
   { id: 'couple-ludo', icon: CircleDot, title: 'Ludo', desc: 'Bring every piece home', players: '2–4 players' },
-  { id: 'couple-catan', icon: Grid2X2, title: 'Catan', desc: 'Trade, build, and settle', players: '2–4 players' },
+  { id: 'couple-catan', icon: Grid2X2, title: 'Catan', desc: 'Trade, build, and settle', players: '3–4 players' },
   { id: 'couple-snakes', icon: Route, title: 'Snakes & Ladders', desc: 'Race to square 100', players: '2–4 players' },
   { id: 'couple-chess', icon: Grid3X3, title: 'Chess', desc: 'A classic match for two', players: '2 players' },
 ]

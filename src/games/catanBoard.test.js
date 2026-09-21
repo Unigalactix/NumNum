@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { BOARD, RESOURCES, act, botAction, citySites, newMatch, roadSites, score, settlementSites, tradeRate } from './catanBoard.js'
+import { BOARD, RESOURCES, act, botAction, citySites, newMatch as createMatch, roadSites, score, settlementSites, tradeRate } from './catanRules.js'
+
+function newMatch(players) {
+  let match = createMatch(players, () => 0)
+  while (match.phase.startsWith('setup')) match = act(match, botAction(match))
+  return match
+}
 
 const seats = (count) => Array.from({ length: count }, (_, index) => ({ id: `player-${index}`, name: `Player ${index}`, isBot: true }))
 
@@ -14,8 +20,8 @@ test('island topology, terrain and ports have the expected counts', () => {
   assert.equal(new Set(BOARD.ports.flatMap((port) => port.ends)).size, 18)
 })
 
-test('two, three and four seats start with spaced corner settlements and connected roads', () => {
-  for (const count of [2, 3, 4]) {
+test('three and four seats start with spaced corner settlements and connected roads', () => {
+  for (const count of [3, 4]) {
     const match = newMatch(seats(count))
     assert.equal(Object.keys(match.buildings).length, count * 2)
     assert.equal(Object.keys(match.roads).length, count * 2)
@@ -28,7 +34,9 @@ test('two, three and four seats start with spaced corner settlements and connect
 })
 
 test('roads cost resources, respect connectivity, and cannot be built before rolling', () => {
-  const match = newMatch(seats(2))
+  const match = newMatch(seats(3))
+  match.hands[0].wood = 2
+  match.hands[0].brick = 2
   const site = roadSites(match, 0)[0]
   assert.equal(act(match, { type: 'road', id: site.id }), match)
   const rolled = act(match, { type: 'roll' }, () => .2)
@@ -43,9 +51,10 @@ test('roads cost resources, respect connectivity, and cannot be built before rol
 })
 
 test('cities upgrade corners and produce twice the adjacent resource', () => {
-  const match = newMatch(seats(2))
+  const match = newMatch(seats(3))
   match.phase = 'build'
   match.hands[0].ore = 3
+  match.hands[0].wheat = 2
   const site = citySites(match, 0)[0]
   const upgraded = act(match, { type: 'city', id: site.id })
   assert.equal(score(upgraded, 0), 3)
@@ -63,7 +72,7 @@ test('cities upgrade corners and produce twice the adjacent resource', () => {
 })
 
 test('ports improve exchange rates only for adjacent owners', () => {
-  const match = newMatch(seats(2))
+  const match = newMatch(seats(3))
   match.buildings = {}
   assert.equal(tradeRate(match, 0, 'wood'), 4)
   const generic = BOARD.ports.find((port) => port.resource === null)
@@ -74,13 +83,16 @@ test('ports improve exchange rates only for adjacent owners', () => {
   assert.equal(tradeRate(match, 0, 'wood'), 2)
   assert.equal(tradeRate(match, 1, 'wood'), 4)
   match.phase = 'build'
+  match.hands[0].wood = 2
+  const oreBefore = match.hands[0].ore
   const traded = act(match, { type: 'trade', from: 'wood', to: 'ore' })
   assert.equal(traded.hands[0].wood, 0)
-  assert.equal(traded.hands[0].ore, 3)
+  assert.equal(traded.hands[0].ore, oreBefore + 1)
 })
 
 test('seven blocks the turn until robber movement and prevents same-tile placement', () => {
-  const match = newMatch(seats(2))
+  const match = newMatch(seats(3))
+  match.hands = match.players.map(() => Object.fromEntries(RESOURCES.map(resource => [resource, 1])))
   const rolls = [.4, .55]
   const rolled = act(match, { type: 'roll' }, () => rolls.length ? rolls.shift() : .1)
   assert.equal(rolled.phase, 'robber')
@@ -95,7 +107,7 @@ test('seven blocks the turn until robber movement and prevents same-tile placeme
 test('bots preserve legal pieces, spacing and nonnegative hands through long matches', () => {
   let seed = 417
   const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296 }
-  for (const count of [2, 3, 4]) {
+  for (const count of [3, 4]) {
     let match = newMatch(seats(count))
     for (let step = 0; step < 1500 && match.winner === null; step++) {
       const previous = match

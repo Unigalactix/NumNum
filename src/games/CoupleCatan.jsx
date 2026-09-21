@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, ArrowRightLeft, Bot, Building2, Dice5, Flag, House, Route, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
 import CoupleGameSetup from './CoupleGameSetup'
 import Modal from '../components/Modal'
-import { BOARD, COSTS, RESOURCES, act, affordable, botAction, citySites, newMatch, roadSites, score, settlementSites, tradeRate } from './catanBoard'
+import { BOARD, COSTS, RESOURCES, act, actor, affordable, botAction, buildSites, cardsTotal, newMatch, score, tradeRate } from './catanRules'
+import { useLocalMatch } from '../hooks/useLocalMatch'
+import CatanChoices from './CatanChoices'
 import { BuildingSticker, RESOURCE_LABELS, ResourceSticker, TERRAIN_COLORS } from './CatanArtwork'
 import './catan.css'
 
@@ -13,12 +15,11 @@ function Die({ value }) {
   return <span className="catan-die" aria-label={value ? `Die: ${value}` : 'Not rolled'}>{Array.from({ length: 9 }, (_, index) => <i key={index} style={{ opacity: DIE_PIPS[value || 0].includes(index) ? 1 : 0 }} />)}</span>
 }
 
-function Island({ match, action, send, zoom }) {
+function Island({ match, action, send, zoom, enabled }) {
   const active = match.players[match.current]
-  const human = !active.isBot && match.winner === null
-  const availableEdges = human && action === 'road' && match.phase === 'build' && affordable(match.hands[match.current], 'road') ? roadSites(match, match.current) : []
-  const availableVertices = human && match.phase === 'build' && action !== 'road' && action && affordable(match.hands[match.current], action)
-    ? action === 'city' ? citySites(match, match.current) : settlementSites(match, match.current) : []
+  const human = enabled && !active.isBot && match.winner === null
+  const availableEdges = human && action === 'road' ? buildSites(match, 'road') : []
+  const availableVertices = human && ['settlement','city'].includes(action) ? buildSites(match, action) : []
   const keyActivate = (event, callback) => {
     if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); callback() }
   }
@@ -95,43 +96,52 @@ function Island({ match, action, send, zoom }) {
 }
 
 export default function CoupleCatan() {
-  const [match, setMatch] = useState(null)
+  const [match, setMatch] = useLocalMatch('catan', null, 3)
+  const [revealed, setRevealed] = useState(null)
   const [action, setAction] = useState(null)
   const [zoom, setZoom] = useState(1)
   const [tradeFrom, setTradeFrom] = useState('wood')
   const [tradeTo, setTradeTo] = useState('ore')
   const [restart, setRestart] = useState(false)
-  const send = (move) => { setMatch((current) => act(current, move)); setAction(null) }
+  const privacyKey = match ? `${match.turn}-${actor(match)}-${match.phase === 'offer' ? 'offer' : match.phase === 'discard' ? 'discard' : 'turn'}` : null
+  const send = (move) => {
+    if (revealed !== privacyKey) return
+    setMatch((current) => act(current, { ...move, actor: actor(current) }))
+    setAction(null)
+  }
 
   useEffect(() => {
-    if (!match || match.winner !== null || !match.players[match.current].isBot || restart) return
+    if (!match || match.winner !== null || !match.players[actor(match)].isBot || restart) return
     const timer = setTimeout(() => setMatch((current) => act(current, botAction(current))), 700)
     return () => clearTimeout(timer)
   }, [match, restart])
 
-  if (!match) return <CoupleGameSetup onStart={(players) => { setMatch(newMatch(players)); setZoom(1); setAction(null) }} />
+  if (!match) return <CoupleGameSetup minPlayers={3} defaultBots={2} onStart={(players) => { setMatch(newMatch(players)); setZoom(1); setAction(null); setRevealed(null) }} />
 
-  const player = match.players[match.current]
-  const hand = match.hands[match.current]
-  const canAct = !player.isBot && match.winner === null
+  const player = match.players[actor(match)]
+  const hand = match.hands[actor(match)]
+  const visible = revealed === privacyKey && !player.isBot
+  const canAct = visible && match.winner === null && !restart
   const canBuild = canAct && match.phase === 'build'
   const rate = tradeRate(match, match.current, tradeFrom)
-  const phaseLabel = match.winner !== null ? `${match.players[match.winner].name} wins` : player.isBot ? `${player.name}'s turn` : match.phase === 'robber' ? 'Move the robber' : match.phase === 'roll' ? `${player.name} to roll` : `${player.name}'s turn`
+  const phaseNames = { setupSettlement: 'Place a settlement', setupRoad: 'Place a road', discard: 'Choose discards', robber: 'Move the robber', victim: 'Choose a player', freeRoads: 'Place free roads', plenty: 'Choose resources', monopoly: 'Choose a resource', offer: 'Trade response' }
+  const phaseLabel = match.winner !== null ? `${match.players[match.winner].name} wins` : `${player.name}: ${phaseNames[match.phase] || (match.phase === 'roll' ? 'roll dice' : 'build & trade')}`
+  const boardAction = match.phase === 'setupSettlement' ? 'settlement' : ['setupRoad','freeRoads'].includes(match.phase) ? 'road' : action
 
   return <div className="catan-table">
     <header className="catan-header">
-      <div><span className="catan-eyebrow">Our island</span><h2>{phaseLabel}</h2><span className="catan-edition">House edition</span></div>
+      <div><span className="catan-eyebrow">Our island</span><h2 role="status">{phaseLabel}</h2><span className="catan-edition">Base game</span></div>
       <div className="catan-header-actions"><Die value={match.dice?.[0]} /><Die value={match.dice?.[1]} /><button className="icon-button" title="New match" aria-label="New match" onClick={() => setRestart(true)}><RotateCcw size={18} /></button></div>
     </header>
     <div className="catan-layout">
       <div className="catan-island">
         <div className="catan-map-tools"><span className="catan-eyebrow">{action ? `Place ${action}` : 'The island'}</span><div>
           <button className="icon-button" title="Zoom out" aria-label="Zoom out" disabled={zoom === 1} onClick={() => setZoom(Math.max(1, zoom - .5))}><ZoomOut size={18} /></button>
-          <button className="icon-button" title="Zoom in" aria-label="Zoom in" disabled={zoom === 2} onClick={() => setZoom(Math.min(2, zoom + .5))}><ZoomIn size={18} /></button>
+          <button className="icon-button" title="Zoom in" aria-label="Zoom in" disabled={zoom === 3} onClick={() => setZoom(Math.min(3, zoom + .5))}><ZoomIn size={18} /></button>
         </div></div>
-        <Island match={match} action={action} send={send} zoom={zoom} />
+        <Island match={match} action={boardAction} send={send} zoom={zoom} enabled={canAct} />
         <div className="catan-turnbar" aria-live="polite"><span>{match.log[0]}</span>
-          {match.winner === null && <button className="btn" disabled={!canAct || match.phase === 'robber'} onClick={() => send({ type: match.phase === 'roll' ? 'roll' : 'end' })}>
+          {match.winner === null && ['roll','build'].includes(match.phase) && <button className="btn" disabled={!canAct} onClick={() => send({ type: match.phase === 'roll' ? 'roll' : 'end' })}>
             {match.phase === 'roll' ? <Dice5 size={18} /> : <ArrowRight size={18} />}{match.phase === 'roll' ? 'Roll dice' : 'End turn'}
           </button>}
         </div>
@@ -139,22 +149,25 @@ export default function CoupleCatan() {
       <aside className="catan-sidebar" aria-label="Players and turn log">
         <h3 className="catan-eyebrow">At the table</h3>
         {match.players.map((seat, index) => <div className={`catan-player ${index === match.current ? 'catan-player-active' : ''}`} key={seat.id} style={{ '--seat-color': seat.color }}>
-          <div className="catan-player-title"><span><i />{seat.name}{seat.isBot && <Bot size={15} />}</span><strong><Flag size={13} />{score(match, index)}<small>/10</small></strong></div>
-          <div className="catan-player-resources">{RESOURCES.map((resource) => <span key={resource} title={`${RESOURCE_LABELS[resource]}: ${match.hands[index][resource]}`}><ResourceSticker resource={resource} width="26" height="26" /><b>{match.hands[index][resource]}</b></span>)}</div>
+          <div className="catan-player-title"><span><i />{seat.name}{seat.isBot && <Bot size={15} />}</span><strong><Flag size={13} />{score(match, index, match.winner !== null || visible && index === actor(match))}<small>/10</small></strong></div>
+          <p className="mt-2 text-xs text-muted">{cardsTotal(match.hands[index])} resources · {match.development[index].length} development cards</p>
+          <p className="mt-1 text-xs text-muted">{match.longest === index ? 'Longest road +2 ' : ''}{match.largest === index ? 'Largest army +2' : ''}Knights: {match.knights[index]}</p>
         </div>)}
         <details className="catan-log"><summary>Turn log</summary><ol>{match.log.map((line, index) => <li key={`${index}-${line}`}>{line}</li>)}</ol></details>
       </aside>
     </div>
-    <section className="catan-hand" aria-label={`${player.name}'s resources`}>
+    {!visible && !player.isBot && match.winner === null && <section className="my-6 border-y py-5 text-center"><h3 className="font-display text-2xl">Pass to {player.name}</h3><button className="btn mt-3" onClick={() => setRevealed(privacyKey)}>Ready, reveal my hand</button></section>}
+    {visible && <><button className="btn-ghost mt-5" onClick={() => setRevealed(null)}>Hide hand</button><section className="catan-hand" aria-label={`${player.name}'s resources`}>
       <div className="catan-section-heading"><h3 className="catan-eyebrow">{player.name}'s hand</h3><span>{Object.values(hand).reduce((total, value) => total + value, 0)} cards</span></div>
       <div className="catan-resource-cards">{RESOURCES.map((resource) => <div key={resource} className="catan-resource-card" style={{ '--terrain': TERRAIN_COLORS[resource] }} title={`${RESOURCE_LABELS[resource]}: ${hand[resource]}`} aria-label={`${hand[resource]} ${RESOURCE_LABELS[resource]}`}>
         <ResourceSticker resource={resource} width="64" height="64" /><strong>{hand[resource]}</strong>
       </div>)}</div>
     </section>
+    {match.winner === null && <CatanChoices key={`${match.revision}-${actor(match)}`} match={match} send={send} />}
     <section className="catan-actions" aria-label="Build and trade">
       <div><h3 className="catan-eyebrow">Build</h3><div className="catan-build-options">
         {BUILD_OPTIONS.map(({ type, Icon }) => {
-          const sites = type === 'road' ? roadSites(match, match.current) : type === 'city' ? citySites(match, match.current) : settlementSites(match, match.current)
+          const sites = buildSites(match, type)
           return <button key={type} title={`Build ${type}`} aria-label={`Build ${type}`} aria-pressed={action === type} disabled={!canBuild || !affordable(hand, type) || !sites.length} onClick={() => setAction(action === type ? null : type)}>
             <Icon size={23} /><span className="catan-cost">{Object.entries(COSTS[type]).map(([resource, count]) => <span key={resource}><ResourceSticker resource={resource} width="25" height="25" />{count > 1 && <b>{count}</b>}</span>)}</span>
           </button>
@@ -164,9 +177,10 @@ export default function CoupleCatan() {
         {[{ label: `Give ${rate}`, value: tradeFrom, set: setTradeFrom }, { label: 'Receive 1', value: tradeTo, set: setTradeTo }].map((group) => <fieldset key={group.label}><legend>{group.label}</legend><div className="catan-resource-picker">
           {RESOURCES.map((resource) => <label key={resource} title={RESOURCE_LABELS[resource]}><input type="radio" name={group.label.startsWith('Give') ? 'catan-give' : 'catan-receive'} aria-label={`${group.label.startsWith('Give') ? 'Give' : 'Receive'} ${RESOURCE_LABELS[resource]}`} checked={group.value === resource} onChange={() => group.set(resource)} /><ResourceSticker resource={resource} width="32" height="32" /></label>)}
         </div></fieldset>)}
-        <button className="btn-ghost" disabled={!canBuild || tradeFrom === tradeTo || hand[tradeFrom] < rate} onClick={() => send({ type: 'trade', from: tradeFrom, to: tradeTo })}><ArrowRightLeft size={17} />Trade {rate}:1</button>
+        <button className="btn-ghost" disabled={!canBuild || tradeFrom === tradeTo || hand[tradeFrom] < rate || match.bank[tradeTo] < 1} onClick={() => send({ type: 'trade', from: tradeFrom, to: tradeTo })}><ArrowRightLeft size={17} />Trade {rate}:1</button>
       </div>
-    </section>
+    </section></>}
+    <div className="mt-5 flex flex-wrap items-center gap-3 border-t pt-3" aria-label="Bank supply"><span className="catan-eyebrow">Bank</span>{RESOURCES.map(resource => <span key={resource} className="flex items-center" title={RESOURCE_LABELS[resource]}><ResourceSticker resource={resource} width="26" height="26" />{match.bank[resource]}</span>)}<span className="text-xs">Deck: {match.deck.length}</span></div>
     <Modal open={restart} onClose={() => setRestart(false)}><h2 className="font-display text-3xl">Start a new match?</h2><p className="mt-3 text-muted">This island's progress will be lost.</p><div className="mt-6 flex gap-3"><button className="btn-ghost" onClick={() => setRestart(false)}>Keep playing</button><button className="btn" onClick={() => { setMatch(null); setRestart(false) }}>New match</button></div></Modal>
   </div>
 }
