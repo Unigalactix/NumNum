@@ -1,4 +1,5 @@
 import { BOARD, COSTS as BUILD_COSTS, RESOURCES, citySites, roadSites, settlementSites, tradeRate } from './catanBoard.js'
+import { integerIn, isRecord, playerIndex, validPlayers } from './matchValidation.js'
 export { BOARD, RESOURCES, citySites, roadSites, settlementSites, tradeRate }
 export const COSTS = { ...BUILD_COSTS, development: { sheep: 1, wheat: 1, ore: 1 } }
 export const CARD_NAMES = { knight: 'Knight', roads: 'Road building', plenty: 'Year of plenty', monopoly: 'Monopoly', victory: 'Victory point' }
@@ -27,6 +28,51 @@ export function newMatch(players, random = Math.random) {
     knights: players.map(() => 0), longest: null, largest: null, discards: [], victims: [], offer: null, freeRoads: 0,
     resumePhase: null, playedDevelopment: false, turn: 0, revision: 0, winner: null, log: [`${players[first].name}: place a settlement.`],
   }
+}
+
+export function isCatanMatch(match) {
+  if (match === null) return true
+  if (!isRecord(match) || !validPlayers(match.players, 3)) return false
+  const { players, phase } = match
+  const owner = value => playerIndex(value, players)
+  const perPlayer = (values, valid) => Array.isArray(values) && values.length === players.length && values.every(valid)
+  const stock = value => isRecord(value) && Object.keys(value).length === RESOURCES.length && RESOURCES.every(resource => integerIn(value[resource], 0, 19))
+  const cardType = type => Object.hasOwn(CARD_NAMES, type)
+  const tile = value => integerIn(value, 0, BOARD.tiles.length - 1)
+  const corner = value => integerIn(value, 0, BOARD.vertices.length - 1)
+  if (!owner(match.current) || !['setupSettlement','setupRoad','roll','build','discard','robber','victim','freeRoads','plenty','monopoly','offer'].includes(phase)
+    || !(match.winner === null || owner(match.winner))
+    || !integerIn(match.turn, 0) || !integerIn(match.revision, 0)
+    || !stock(match.bank) || !perPlayer(match.hands, stock)
+    || !perPlayer(match.knights, value => integerIn(value, 0, 14))
+    || !perPlayer(match.development, cards => Array.isArray(cards) && cards.every(card => isRecord(card) && cardType(card.type) && integerIn(card.bought, 0, match.turn)))
+    || !Array.isArray(match.deck) || !match.deck.every(cardType)
+    || ![match.longest, match.largest].every(value => value === null || owner(value))
+    || typeof match.playedDevelopment !== 'boolean' || !integerIn(match.freeRoads, 0, 2)
+    || !tile(match.robber)
+    || !(match.dice === null || Array.isArray(match.dice) && match.dice.length === 2 && match.dice.every(value => integerIn(value, 1, 6)))
+    || !Array.isArray(match.log) || !match.log.length || !match.log.every(line => typeof line === 'string')
+    || !isRecord(match.buildings) || !Object.entries(match.buildings).every(([id, building]) => String(Number(id)) === id && corner(Number(id)) && isRecord(building) && owner(building.owner) && integerIn(building.level, 1, 2))
+    || !isRecord(match.roads) || !Object.entries(match.roads).every(([id, player]) => String(Number(id)) === id && integerIn(Number(id), 0, BOARD.edges.length - 1) && owner(player))
+    || !Array.isArray(match.setupOrder) || match.setupOrder.length !== players.length * 2 || !match.setupOrder.every(owner)
+    || !integerIn(match.setupIndex, 0, match.setupOrder.length)
+    || !Array.isArray(match.discards) || !match.discards.every(discard => isRecord(discard) && owner(discard.owner) && integerIn(discard.count, 1, cardsTotal(match.hands[discard.owner])))
+    || !Array.isArray(match.victims) || !match.victims.every(player => owner(player) && player !== match.current && cardsTotal(match.hands[player]) > 0)) return false
+  if (RESOURCES.some(resource => match.bank[resource] + match.hands.reduce((total, hand) => total + hand[resource], 0) !== 19)) return false
+  if (phase.startsWith('setup') && (match.setupOrder[match.setupIndex] !== match.current || phase === 'setupRoad' && (!corner(match.setupVertex) || match.buildings[match.setupVertex]?.owner !== match.current))) return false
+  if (phase === 'discard' && !match.discards.length || phase === 'victim' && !match.victims.length) return false
+  if (['discard','robber','victim','freeRoads','plenty','monopoly'].includes(phase) && !['roll','build'].includes(match.resumePhase)) return false
+  if (phase === 'freeRoads' && (!match.freeRoads || !roadSites(match, match.current).length)) return false
+  if (phase === 'offer') {
+    const offer = match.offer
+    if (!isRecord(offer) || !owner(offer.target) || offer.target === match.current
+      || !isRecord(offer.give) || !isRecord(offer.take)
+      || !cardsTotal(offer.give) || !cardsTotal(offer.take)
+      || !validSelection(offer.give, cardsTotal(offer.give), match.hands[match.current])
+      || !validSelection(offer.take, cardsTotal(offer.take), resources(19))
+      || RESOURCES.some(resource => offer.give[resource] && offer.take[resource])) return false
+  }
+  return true
 }
 
 export function longestRoad(match, owner) {
@@ -76,8 +122,7 @@ function pay(match, owner, type) {
 }
 
 function validSelection(selection, total, available) {
-  if (!selection || Object.keys(selection).some((resource) => !RESOURCES.includes(resource))) return false
-  return RESOURCES.every((resource) => Number.isInteger(selection[resource] || 0) && (selection[resource] || 0) >= 0 && (selection[resource] || 0) <= available[resource]) && cardsTotal(selection) === total
+  return isRecord(selection) && Object.entries(selection).every(([resource, count]) => RESOURCES.includes(resource) && integerIn(count, 0, available[resource])) && cardsTotal(selection) === total
 }
 
 function receive(match, owner, selection) {
@@ -175,7 +220,7 @@ export function act(match, action, random = Math.random) {
     if(!Number.isInteger(target)||!next.players[target]||target===owner||!action.give||!action.take)return match
     if(!cardsTotal(action.give)||!cardsTotal(action.take)||!validSelection(action.give,cardsTotal(action.give),hand)||!validSelection(action.take,cardsTotal(action.take),resources(19)))return match
     if(RESOURCES.some(resource=>action.give[resource]&&action.take[resource]))return match
-    next.offer={target,give:action.give,take:action.take};next.phase='offer'
+    next.offer={target,give:{...action.give},take:{...action.take}};next.phase='offer'
     message=`${name} offered a trade to ${next.players[target].name}.`
   } else if(action.type==='respond'&&next.phase==='offer'){
     const offer=next.offer

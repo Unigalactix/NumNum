@@ -1,4 +1,13 @@
 import { Chess } from 'chess.js'
+import { isRecord } from './matchValidation.js'
+
+export function isChessMatch(match) {
+  if (!isRecord(match) || !Array.isArray(match.moves) || !match.moves.every(move => typeof move === 'string')) return false
+  const result = chessResult(restoreChess(match.moves))
+  return match.result === null || match.result === result || [
+    'Draw claimed', 'Draw by agreement', 'Neha wins by resignation', 'Rajesh wins by resignation',
+  ].includes(match.result)
+}
 
 export function restoreChess(moves = []) {
   const game = new Chess()
@@ -7,12 +16,13 @@ export function restoreChess(moves = []) {
 }
 
 export function repetitionCount(game) {
-  const replay = new Chess()
+  const history = game.history({ verbose: true })
+  const replay = new Chess(history[0]?.before || game.fen())
   const key = (position) => position.fen().split(' ').slice(0, 4).join(' ')
   const target = key(game)
   let count = key(replay) === target ? 1 : 0
-  for (const move of game.history()) {
-    replay.move(move)
+  for (const move of history) {
+    replay.move(move.san)
     if (key(replay) === target) count++
   }
   return count

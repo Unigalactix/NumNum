@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { BOARD, RESOURCES, act, botAction, newMatch, actor, score, longestRoad } from './catanRules.js'
+import { BOARD, RESOURCES, act, botAction, buildSites, isCatanMatch, newMatch, actor, score, longestRoad } from './catanRules.js'
 const players=Array.from({length:4},(_,id)=>({id,name:`Player ${id}`,isBot:true}))
 const setup=(count=4)=>{let match=newMatch(players.slice(0,count),()=>0);while(match.phase.startsWith('setup'))match=act(match,botAction(match));return match}
 const fund=(match,owner)=>{for(const resource of RESOURCES){const amount=Math.min(5,match.bank[resource]);match.hands[owner][resource]+=amount;match.bank[resource]-=amount}}
@@ -71,6 +71,7 @@ test('full three- and four-player bot matches finish and conserve resources',()=
       const next=act(match,botAction(match),random)
       assert.notEqual(next,match,`stuck ${match.phase}`)
       match=next
+      assert.equal(isCatanMatch(JSON.parse(JSON.stringify(match))), true, `invalid save in ${match.phase}`)
       for(const resource of RESOURCES){assert.equal(match.bank[resource]+match.hands.reduce((total,hand)=>total+hand[resource],0),19);assert.ok(match.bank[resource]>=0);for(const hand of match.hands)assert.ok(hand[resource]>=0)}
     }
     assert.notEqual(match.winner,null,`${count} players, seed ${initialSeed}`)
@@ -110,4 +111,60 @@ test('hidden points count only in private scoring and win on the owners turn',()
   assert.equal(match.current,1)
   assert.equal(match.winner,1)
   assert.equal(act(match,{type:'roll'}),match)
+})
+
+test('trade offers own their payload instead of sharing mutable UI selections', () => {
+  const match = setup()
+  match.phase = 'build'
+  fund(match, 0)
+  fund(match, 1)
+  const give = { wood: 1 }
+  const take = { ore: 1 }
+  const offered = act(match, { type: 'offer', target: 1, give, take })
+  give.wood = 19
+  take.ore = 19
+  assert.deepEqual(offered.offer.give, { wood: 1 })
+  assert.deepEqual(offered.offer.take, { ore: 1 })
+  assert.equal(isCatanMatch(offered), true)
+  assert.equal(act(offered, { type: 'respond', accept: true, actor: 1 }).hands[0].wood, match.hands[0].wood - 1)
+})
+
+test('resource choices reject nulls, booleans, fractions and unknown resources without mutation', () => {
+  const match = setup()
+  match.phase = 'build'
+  fund(match, 0)
+  for (const give of [{ wood: 1, ore: null }, { wood: true }, { wood: .5 }, { wood: 1, unknown: 0 }]) {
+    assert.equal(act(match, { type: 'offer', target: 1, give, take: { brick: 1 } }), match)
+  }
+})
+
+test('road building returns to its previous phase when the final road piece is used', () => {
+  let match = setup()
+  match.current = 0
+  match.turn = 4
+  match.development[0] = [{ type: 'roads', bought: 0 }]
+  match.phase = 'freeRoads'
+  match.resumePhase = 'roll'
+  while (Object.values(match.roads).filter(owner => owner === 0).length < 14) {
+    const site = buildSites(match, 'road')[0]
+    assert.ok(site)
+    match.roads[site.id] = 0
+  }
+  match.phase = 'roll'
+  match = act(match, { type: 'playDevelopment', index: 0 })
+  assert.equal(match.phase, 'freeRoads')
+  match = act(match, { type: 'road', id: buildSites(match, 'road')[0].id })
+  assert.equal(match.phase, 'roll')
+  assert.equal(Object.values(match.roads).filter(owner => owner === 0).length, 15)
+  assert.equal(isCatanMatch(match), true)
+})
+
+test('Catan saves reject broken boards, supply, owners and incomplete effect phases', () => {
+  const match = setup()
+  assert.equal(isCatanMatch(match), true)
+  for (const value of [[], {}, { ...match, current: 8 }, { ...match, hands: [] }, { ...match, buildings: { 999: { owner: 0, level: 1 } } },
+    { ...match, phase: 'discard', discards: [] }, { ...match, phase: 'victim', victims: [] }, { ...match, phase: 'offer', offer: null },
+    { ...match, phase: 'robber', resumePhase: null }, { ...match, bank: { ...match.bank, ore: -1 } }]) {
+    assert.equal(isCatanMatch(value), false)
+  }
 })

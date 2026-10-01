@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, Heart, RotateCcw } from 'lucide-react'
 import { content } from './content'
@@ -14,6 +14,8 @@ import FinaleLetter from './components/FinaleLetter'
 import StickerBook from './components/StickerBook'
 import PreviousLetters from './components/PreviousLetters'
 import HistoryOfUs from './components/HistoryOfUs'
+import WorldAtmosphere from './components/WorldAtmosphere'
+import { useWorldSettings } from './hooks/useWorldSettings'
 
 import RiddleGate from './games/RiddleGate'
 import MemoryMatch from './games/MemoryMatch'
@@ -37,6 +39,7 @@ import SnakesAndLadders from './games/SnakesAndLadders'
 import CoupleChess from './games/CoupleChess'
 
 const COUPLE_GAME_IDS = new Set(['couple-ludo', 'couple-catan', 'couple-snakes', 'couple-chess'])
+const LittleCompanion = lazy(() => import('./components/LittleCompanion'))
 
 const GAME_COMPONENTS = {
   memory: MemoryMatch,
@@ -83,6 +86,7 @@ const GAME_TITLES = {
 }
 
 export default function App() {
+  const world = useWorldSettings()
   const entered = useStore((s) => s.entered)
   const completeGame = useStore((s) => s.completeGame)
   const completed = useStore((s) => s.completed)
@@ -210,7 +214,8 @@ export default function App() {
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="app-world relative isolate min-h-screen">
+      <WorldAtmosphere />
       <GrainOverlay />
       {celebrate && <Confetti />}
 
@@ -237,7 +242,12 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {entered && <AppNav view={view} onNavigate={setView} />}
+      {entered && <AppNav view={view} onNavigate={setView} world={world} />}
+      {entered && !ActiveGame && world.settings.companion !== 'none' && (
+        <Suspense fallback={null}>
+          <LittleCompanion kind={world.settings.companion} animate={world.settings.animate} />
+        </Suspense>
+      )}
 
       <AnimatePresence mode="wait">
         {!entered ? (

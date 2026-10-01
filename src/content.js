@@ -342,6 +342,32 @@ export const content = {
       imageAlt: 'Neha, Rajesh, and Sergio kayaking under moonlight on Lake Union',
       imageLabel: 'View kayaking photo',
     },
+    {
+      date: 'September 19th, 2026',
+      emoji: '🕯️',
+      title: 'Beneath the Streets and a movie date',
+      detail: 'We explored Seattle underground, then watched Happy Journey together.',
+    },
+    {
+      date: 'September 20th, 2026',
+      emoji: '🚗',
+      title: 'Your first driving class',
+    },
+    {
+      date: 'September 24th, 2026',
+      emoji: '🎬',
+      title: 'The Paradise with your work friends',
+      detail: 'A movie night together with your work friends.',
+    },
+    {
+      date: 'September 26th, 2026',
+      emoji: '🌃',
+      title: 'Columbia Center Skydeck',
+      detail: 'Seattle shining below us from high above the city.',
+      image: 'assets/columbia-center-skydeck.png',
+      imageAlt: 'Rajesh and Neha together at the Columbia Center Skydeck in Seattle',
+      imageLabel: 'View Skydeck photo',
+    },
   ],
 
   // Short sweet notes revealed after each mini-game

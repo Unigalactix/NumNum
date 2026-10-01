@@ -1,11 +1,12 @@
-import { Bot, Heart, Play } from 'lucide-react'
+import { Bot, Play } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { tap } from '../lib/motion'
+import PlayerAvatar from '../components/PlayerAvatar'
 
 const PLAYER_COLORS = ['#8f4058', '#71867a', '#c28c45', '#637fa3']
 
-export default function CoupleGameSetup({ description, onStart, minPlayers = 2, defaultBots = 0 }) {
+export default function CoupleGameSetup({ description, onStart, minPlayers = 2, defaultBots = 0, error }) {
   const [seats, setSeats] = useState(Array.from({ length: 2 }, (_, index) => index < defaultBots ? 'bot' : 'empty'))
 
   const start = () => {
@@ -24,13 +25,12 @@ export default function CoupleGameSetup({ description, onStart, minPlayers = 2, 
   return (
     <div className="mx-auto max-w-xl text-center">
       {description && <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted">{description}</p>}
+      {error && <p role="alert" className="mt-4 text-sm text-wine">{error}</p>}
 
       <div className="mt-7 grid gap-3 sm:grid-cols-2">
         {['Rajesh', 'Neha'].map((name, index) => (
           <div key={name} className="flex items-center gap-3 rounded-lg border border-[#e4dde0] bg-white/75 p-4 text-left">
-            <span className="grid h-10 w-10 place-items-center rounded-lg text-white" style={{ backgroundColor: PLAYER_COLORS[index] }}>
-              <Heart size={18} fill="currentColor" aria-hidden="true" />
-            </span>
+            <PlayerAvatar player={{ id: name.toLowerCase(), name, color: PLAYER_COLORS[index] }} decorative />
             <span>
               <span className="block text-sm font-bold text-ink">{name}</span>
               <span className="text-xs text-muted">playing together</span>

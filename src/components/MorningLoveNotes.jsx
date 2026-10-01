@@ -127,7 +127,7 @@ export default function MorningLoveNotes() {
             </span>
             <h3 className="font-display text-3xl text-ink">Pause your daily love notes?</h3>
             <p className="mt-3 leading-relaxed text-muted">
-              Your mornings and afternoons will be a little quieter. You can turn them back on anytime from the bell.
+              Your mornings, afternoons, and nights will be a little quieter. You can turn them back on anytime from the bell.
             </p>
             {error && <p className="mt-3 text-sm text-wine" role="status">{error}</p>}
             <div className="mt-6 flex flex-col-reverse justify-center gap-3 sm:flex-row">

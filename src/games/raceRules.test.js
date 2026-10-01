@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { FINISH, LUDO_TRACK, ludoCoordinate, ludoMoves, newRace, raceAction, raceBot } from './raceRules.js'
+import { FINISH, LUDO_TRACK, isRaceMatch, ludoCoordinate, ludoMoves, newRace, raceAction, raceBot } from './raceRules.js'
 const players = Array.from({ length: 4 }, (_, index) => ({ id: index, name: `Player ${index}`, isBot: true }))
 
 test('cross has 52 unique squares and visible yard, lane and finish coordinates', () => {
@@ -55,7 +55,50 @@ test('full race bot matches finish for every supported seat count', () => {
   const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296 }
   for (const count of [2,3,4]) for (const game of ['snakes','ludo']) {
     let match = newRace(players.slice(0,count), game, random)
-    for (let step = 0; step < 20000 && match.winner === null; step++) match = raceAction(match, raceBot(match), random)
+    for (let step = 0; step < 20000 && match.winner === null; step++) {
+      match = raceAction(match, raceBot(match), random)
+      assert.equal(isRaceMatch(JSON.parse(JSON.stringify(match)), game), true)
+    }
     assert.notEqual(match.winner, null, `${game} ${count} seats`)
   }
+})
+
+test('two-player Ludo uses opposite seats and captures only on the shared track', () => {
+  let match = newRace(players.slice(0, 2), 'ludo', () => 0)
+  assert.deepEqual(match.players.map(player => player.seat), [0, 2])
+  match.pieces[0][0] = 25
+  match.pieces[1][0] = 1
+  match.die = 2
+  match = raceAction(match, { type: 'move', piece: 0 })
+  assert.equal(match.pieces[1][0], -1)
+  assert.equal(match.current, 1)
+  match.current = 0
+  match.pieces[0][0] = 50
+  match.pieces[1][0] = 25
+  match.die = 1
+  match = raceAction(match, { type: 'move', piece: 0 })
+  assert.equal(match.pieces[1][0], 25)
+  assert.deepEqual(ludoCoordinate(match, 0, 0), [7, 1])
+})
+
+test('snake animation includes the origin, each step and the jump endpoint', () => {
+  const initial = newRace(players, 'snakes', () => 0)
+  const climbed = raceAction(initial, { type: 'roll' }, () => .51)
+  assert.deepEqual(climbed.path, [0, 1, 2, 3, 4, 25])
+  assert.equal(initial.positions[0], 0)
+  initial.positions[0] = 98
+  const overshot = raceAction(initial, { type: 'roll' }, () => .99)
+  assert.deepEqual(overshot.path, [98])
+  const won = raceAction(initial, { type: 'roll' }, () => .2)
+  assert.equal(raceAction(won, { type: 'roll' }), won)
+})
+
+test('race save validation rejects broken seats, coordinates, turns and unplayable dice', () => {
+  const match = newRace(players, 'ludo', () => 0)
+  for (const value of [{}, [], { ...match, current: 4 }, { ...match, pieces: [] }, { ...match, positions: null }, { ...match, die: 1 }]) {
+    assert.equal(isRaceMatch(value, 'ludo'), false)
+  }
+  assert.equal(isRaceMatch(match, 'snakes'), false)
+  match.pieces[0][0] = FINISH + 1
+  assert.equal(isRaceMatch(match, 'ludo'), false)
 })

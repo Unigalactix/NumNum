@@ -1,11 +1,6 @@
 import { createHash } from 'node:crypto'
 import { stickerCollection } from '../src/content.js'
-import {
-  afternoonNoteForDay,
-  afternoonNotes,
-  loveNoteForDay,
-  loveNotes,
-} from '../src/loveNotes.js'
+import { loveNoteForSlot, validateNoteCollections } from '../src/loveNotes.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const DEFAULT_APP_ID = 'a8eaa49d-51c4-426f-8bcb-63bd36f32b5a'
@@ -24,15 +19,6 @@ const AFTERNOON_TIMES = [
   '5:15PM',
   '5:30PM',
 ]
-const NIGHT_MESSAGES = [
-  'I love you moreeeeeeeeeee',
-  'papaaa, i love you',
-  'Neeku okati telsa papa, i love you moreee',
-  'Eyyy papa, pandhi la aruvu okasari, hihi   i love you',
-  'ey pandhi, i love you',
-  'oiiiiiiiiiiiiii',
-  'PAPAAAAAAAAAAAAAAAA',
-]
 const dryRun = process.argv.includes('--dry-run') || process.env.DRY_RUN === 'true'
 const periodArgument = process.argv.find((argument) => argument.startsWith('--period='))
 const dayArgument = process.argv.find((argument) => argument.startsWith('--day='))
@@ -44,10 +30,6 @@ const notificationAssetUrl = (fileName) => new URL(`assets/notifications/${fileN
 const dayNumber = Number(process.env.NOTE_DAY || dayArgument?.split('=')[1] || Math.floor(Date.now() / DAY_MS))
 const isAfternoon = period === 'afternoon'
 const isNight = period === 'night'
-const dayOfWeek = new Date(dayNumber * DAY_MS).getUTCDay()
-const weekNumber = Math.floor(dayNumber / 7)
-const weeklyTinglishPeriod = weekNumber % 2 === 0 ? 'morning' : 'afternoon'
-const useTinglish = dayOfWeek === 0 && period === weeklyTinglishPeriod
 
 if (!Number.isInteger(dayNumber) || dayNumber < 0) {
   throw new Error(`Invalid day number: ${dayNumber}`)
@@ -57,16 +39,8 @@ if (!['morning', 'afternoon', 'night'].includes(period)) {
   throw new Error(`Unknown love-note period: ${period}`)
 }
 
-const messages = isNight ? NIGHT_MESSAGES : isAfternoon ? afternoonNotes : loveNotes
-const note = isNight
-  ? {
-      body: NIGHT_MESSAGES[Math.abs(dayNumber * 5 + 2) % NIGHT_MESSAGES.length],
-      index: Math.abs(dayNumber * 5 + 2) % NIGHT_MESSAGES.length,
-      isTinglish: false,
-    }
-  : isAfternoon
-    ? afternoonNoteForDay(dayNumber, { tinglish: useTinglish })
-    : loveNoteForDay(dayNumber, { tinglish: useTinglish })
+validateNoteCollections()
+const note = loveNoteForSlot(dayNumber, period)
 const nightMinute = Math.abs(dayNumber * 137 + 53) % (6 * 60)
 const nightHour = 18 + Math.floor(nightMinute / 60)
 const deliveryTime = isNight
@@ -85,7 +59,6 @@ const sticker = isNight
   ? null
   : stickerCollection[Math.abs(dayNumber * 31 + (isAfternoon ? 17 : 3)) % stickerCollection.length]
 const richImageUrl = sticker ? new URL(sticker.notificationFile, siteUrl).href : null
-const headingEmoji = note.isTinglish ? '💞' : isAfternoon ? '💗' : '☀️'
 const iconUrl = notificationAssetUrl('notification-icon.png')
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
@@ -127,18 +100,6 @@ async function createNotification(payload) {
   throw new Error('OneSignal notification retries were exhausted.')
 }
 
-if (isNight && (NIGHT_MESSAGES.length !== 7 || new Set(NIGHT_MESSAGES).size !== 7)) {
-  throw new Error('The night message collection must contain exactly 7 unique messages.')
-}
-
-if (!isNight && (messages.length !== 1000 || new Set(messages).size !== 1000)) {
-  throw new Error(`The ${period} love-note collection must contain exactly 1,000 unique messages.`)
-}
-
-if (Math.max(...messages.map((message) => message.length)) > 120) {
-  throw new Error(`${period} love notes must stay at or below 120 characters.`)
-}
-
 const notification = {
   app_id: appId,
   ...(!isNight ? { chrome_web_badge: notificationAssetUrl('notification-badge.png') } : {}),
@@ -146,9 +107,12 @@ const notification = {
   ...(showRichImage ? { chrome_web_image: richImageUrl } : {}),
   contents: { en: note.body },
   data: {
-    note_language: isNight ? 'playful' : note.isTinglish ? 'tinglish' : 'english',
+    note_language: note.isTinglish ? 'tinglish' : 'english',
     note_period: period,
     note_style: visualStyle,
+    note_id: note.id,
+    note_theme: note.theme,
+    note_sender: note.sender,
     ...(sticker ? { sticker_id: sticker.id } : {}),
   },
   delivery_time_of_day: deliveryTime,
@@ -157,7 +121,7 @@ const notification = {
     { field: 'tag', key: 'morning_love_notes', relation: '=', value: 'enabled' },
   ],
   ...(!isNight ? { firefox_icon: iconUrl } : {}),
-  ...(!isNight ? { headings: { en: `${headingEmoji} ${note.title}` } } : {}),
+  headings: { en: note.title },
   idempotency_key: idempotencyKey,
   name: `NumNum ${period} love note ${dayNumber}`,
   target_channel: 'push',
@@ -177,7 +141,7 @@ const notification = {
 }
 
 if (dryRun) {
-  console.log(JSON.stringify({ deliveryTime, index: note.index, language: isNight ? 'playful' : note.isTinglish ? 'tinglish' : 'english', period, showRichImage, sticker: sticker?.id || null, visualStyle, weeklyTinglishPeriod, notification }, null, 2))
+  console.log(JSON.stringify({ deliveryTime, index: note.index, language: note.isTinglish ? 'tinglish' : 'english', period, showRichImage, sticker: sticker?.id || null, visualStyle, notification }, null, 2))
   process.exit(0)
 }
 

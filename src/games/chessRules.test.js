@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { Chess } from 'chess.js'
-import { chessResult, restoreChess, repetitionCount } from './chessRules.js'
+import { chessResult, isChessMatch, restoreChess, repetitionCount } from './chessRules.js'
 test('history survives serialization and repetition is claimable before automatic fivefold', () => {
   const cycle = ['Nf3','Nf6','Ng1','Ng8']
   const moves = JSON.parse(JSON.stringify([...cycle,...cycle]))
@@ -10,6 +10,21 @@ test('history survives serialization and repetition is claimable before automati
   assert.equal(chessResult(game),null)
   assert.equal(game.isThreefoldRepetition(),true)
   assert.equal(chessResult(restoreChess([...moves,...moves])),'Draw by fivefold repetition')
+})
+test('repetition counts the actual initial position rather than assuming a standard board', () => {
+  const game = new Chess('6nk/8/8/8/8/8/8/KN6 w - - 0 1')
+  assert.equal(repetitionCount(game), 1)
+  for (const move of ['Nc3','Nf6','Nb1','Ng8','Nc3','Nf6','Nb1','Ng8']) game.move(move)
+  assert.equal(repetitionCount(game), 3)
+})
+test('saved chess matches retain claims, resignation, agreement and automatic results', () => {
+  for (const result of [null, 'Draw claimed', 'Draw by agreement', 'Rajesh wins by resignation', 'Neha wins by resignation']) {
+    assert.equal(isChessMatch({ moves: ['e4', 'e5'], result }), true)
+  }
+  assert.equal(isChessMatch({ moves: ['f3', 'e5', 'g4', 'Qh4#'], result: 'Neha wins by checkmate' }), true)
+  assert.equal(isChessMatch(null), false)
+  assert.equal(isChessMatch({ moves: {}, result: null }), false)
+  assert.equal(isChessMatch({ moves: [], result: 'not a result' }), false)
 })
 test('castling, en passant and checkmate are preserved', () => {
   const castle = restoreChess(['e4','e5','Nf3','Nc6','Bc4','Nf6','O-O'])

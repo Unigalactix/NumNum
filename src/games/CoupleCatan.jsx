@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, ArrowRightLeft, Bot, Building2, Dice5, Flag, House, Route, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
 import CoupleGameSetup from './CoupleGameSetup'
 import Modal from '../components/Modal'
-import { BOARD, COSTS, RESOURCES, act, actor, affordable, botAction, buildSites, cardsTotal, newMatch, score, tradeRate } from './catanRules'
+import PlayerAvatar from '../components/PlayerAvatar'
+import { BOARD, COSTS, RESOURCES, act, actor, affordable, botAction, buildSites, cardsTotal, isCatanMatch, newMatch, score, tradeRate } from './catanRules'
 import { useLocalMatch } from '../hooks/useLocalMatch'
 import CatanChoices from './CatanChoices'
 import { BuildingSticker, RESOURCE_LABELS, ResourceSticker, TERRAIN_COLORS } from './CatanArtwork'
@@ -77,6 +78,8 @@ function Island({ match, action, send, zoom, enabled }) {
       {availableEdges.map((edge) => {
         const [start, end] = edge.ends.map((id) => BOARD.vertices[id])
         return <g key={edge.id} className="catan-target" role="button" tabIndex={0} aria-label={`Build road ${edge.id + 1}`} onClick={() => send({ type: 'road', id: edge.id })} onKeyDown={(event) => keyActivate(event, () => send({ type: 'road', id: edge.id }))}>
+          {/* Stroke width alone gives horizontal roads a zero-height focus box. */}
+          <rect x={Math.min(start.x, end.x) - 11} y={Math.min(start.y, end.y) - 11} width={Math.abs(end.x - start.x) + 22} height={Math.abs(end.y - start.y) + 22} fill="transparent" pointerEvents="none" />
           <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke="transparent" strokeWidth="22" />
           <line x1={start.x * .8 + end.x * .2} y1={start.y * .8 + end.y * .2} x2={end.x * .8 + start.x * .2} y2={end.y * .8 + start.y * .2} stroke="#fffdf4" strokeWidth="7" strokeDasharray="5 5" />
         </g>
@@ -96,7 +99,7 @@ function Island({ match, action, send, zoom, enabled }) {
 }
 
 export default function CoupleCatan() {
-  const [match, setMatch] = useLocalMatch('catan', null, 3)
+  const [match, setMatch, storageError] = useLocalMatch('catan', null, 3, isCatanMatch)
   const [revealed, setRevealed] = useState(null)
   const [action, setAction] = useState(null)
   const [zoom, setZoom] = useState(1)
@@ -105,18 +108,18 @@ export default function CoupleCatan() {
   const [restart, setRestart] = useState(false)
   const privacyKey = match ? `${match.turn}-${actor(match)}-${match.phase === 'offer' ? 'offer' : match.phase === 'discard' ? 'discard' : 'turn'}` : null
   const send = (move) => {
-    if (revealed !== privacyKey) return
-    setMatch((current) => act(current, { ...move, actor: actor(current) }))
+    if (revealed !== privacyKey || restart || match.players[actor(match)].isBot) return
+    setMatch((current) => act(current, { ...move, actor: actor(match) }), match)
     setAction(null)
   }
 
   useEffect(() => {
     if (!match || match.winner !== null || !match.players[actor(match)].isBot || restart) return
-    const timer = setTimeout(() => setMatch((current) => act(current, botAction(current))), 700)
+    const timer = setTimeout(() => setMatch((current) => act(current, botAction(current)), match), 700)
     return () => clearTimeout(timer)
   }, [match, restart])
 
-  if (!match) return <CoupleGameSetup minPlayers={3} defaultBots={2} onStart={(players) => { setMatch(newMatch(players)); setZoom(1); setAction(null); setRevealed(null) }} />
+  if (!match) return <CoupleGameSetup minPlayers={3} defaultBots={2} error={storageError} onStart={(players) => { setMatch(newMatch(players)); setZoom(1); setAction(null); setRevealed(null) }} />
 
   const player = match.players[actor(match)]
   const hand = match.hands[actor(match)]
@@ -129,6 +132,7 @@ export default function CoupleCatan() {
   const boardAction = match.phase === 'setupSettlement' ? 'settlement' : ['setupRoad','freeRoads'].includes(match.phase) ? 'road' : action
 
   return <div className="catan-table">
+    {storageError && <p role="alert" className="mb-4 text-sm text-wine">{storageError}</p>}
     <header className="catan-header">
       <div><span className="catan-eyebrow">Our island</span><h2 role="status">{phaseLabel}</h2><span className="catan-edition">Base game</span></div>
       <div className="catan-header-actions"><Die value={match.dice?.[0]} /><Die value={match.dice?.[1]} /><button className="icon-button" title="New match" aria-label="New match" onClick={() => setRestart(true)}><RotateCcw size={18} /></button></div>
@@ -149,14 +153,14 @@ export default function CoupleCatan() {
       <aside className="catan-sidebar" aria-label="Players and turn log">
         <h3 className="catan-eyebrow">At the table</h3>
         {match.players.map((seat, index) => <div className={`catan-player ${index === match.current ? 'catan-player-active' : ''}`} key={seat.id} style={{ '--seat-color': seat.color }}>
-          <div className="catan-player-title"><span><i />{seat.name}{seat.isBot && <Bot size={15} />}</span><strong><Flag size={13} />{score(match, index, match.winner !== null || visible && index === actor(match))}<small>/10</small></strong></div>
+          <div className="catan-player-title"><span><PlayerAvatar player={seat} size={32} decorative />{seat.name}{seat.isBot && <Bot size={15} />}</span><strong><Flag size={13} />{score(match, index, match.winner !== null || visible && index === actor(match))}<small>/10</small></strong></div>
           <p className="mt-2 text-xs text-muted">{cardsTotal(match.hands[index])} resources · {match.development[index].length} development cards</p>
           <p className="mt-1 text-xs text-muted">{match.longest === index ? 'Longest road +2 ' : ''}{match.largest === index ? 'Largest army +2' : ''}Knights: {match.knights[index]}</p>
         </div>)}
         <details className="catan-log"><summary>Turn log</summary><ol>{match.log.map((line, index) => <li key={`${index}-${line}`}>{line}</li>)}</ol></details>
       </aside>
     </div>
-    {!visible && !player.isBot && match.winner === null && <section className="my-6 border-y py-5 text-center"><h3 className="font-display text-2xl">Pass to {player.name}</h3><button className="btn mt-3" onClick={() => setRevealed(privacyKey)}>Ready, reveal my hand</button></section>}
+    {!visible && !player.isBot && match.winner === null && <section className="my-6 border-y py-5 text-center"><PlayerAvatar player={player} decorative /><h3 className="mt-2 font-display text-2xl">Pass to {player.name}</h3><button className="btn mt-3" onClick={() => setRevealed(privacyKey)}>Ready, reveal my hand</button></section>}
     {visible && <><button className="btn-ghost mt-5" onClick={() => setRevealed(null)}>Hide hand</button><section className="catan-hand" aria-label={`${player.name}'s resources`}>
       <div className="catan-section-heading"><h3 className="catan-eyebrow">{player.name}'s hand</h3><span>{Object.values(hand).reduce((total, value) => total + value, 0)} cards</span></div>
       <div className="catan-resource-cards">{RESOURCES.map((resource) => <div key={resource} className="catan-resource-card" style={{ '--terrain': TERRAIN_COLORS[resource] }} title={`${RESOURCE_LABELS[resource]}: ${hand[resource]}`} aria-label={`${hand[resource]} ${RESOURCE_LABELS[resource]}`}>

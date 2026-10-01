@@ -15,6 +15,27 @@ export const LUDO_YARDS = [[0,0],[0,9],[9,9],[9,0]]
 export const LUDO_COLORS = ['#bb4354', '#368465', '#d29b28', '#397cbb']
 export const FINISH = 56
 
+export function isRaceMatch(match, game) {
+  if (match === null) return true
+  if (!isRecord(match) || match.game !== game || !validPlayers(match.players)) return false
+  const { players } = match
+  return playerIndex(match.current, players)
+    && (match.winner === null || playerIndex(match.winner, players))
+    && players.every(player => integerIn(player.seat, 0, 3))
+    && new Set(players.map(player => player.seat)).size === players.length
+    && Array.isArray(match.pieces) && match.pieces.length === players.length
+    && match.pieces.every(pieces => Array.isArray(pieces) && pieces.length === 4 && pieces.every(value => integerIn(value, -1, FINISH)))
+    && Array.isArray(match.positions) && match.positions.length === players.length && match.positions.every(value => integerIn(value, 0, 100))
+    && (match.die === null || integerIn(match.die, 1, 6))
+    && (match.lastRoll === undefined || integerIn(match.lastRoll, 1, 6))
+    && integerIn(match.sixes, 0, 2) && integerIn(match.turn, 0)
+    && typeof match.log === 'string'
+    && Array.isArray(match.path) && match.path.every(value => integerIn(value, 0, 100))
+    && (match.moved === undefined || playerIndex(match.moved, players))
+    && (match.winner === null || (game === 'ludo' ? match.pieces[match.winner].every(value => value === FINISH) : match.positions[match.winner] === 100))
+    && (game !== 'ludo' || match.winner !== null || match.die === null || ludoMoves(match).length > 0)
+}
+
 export function newRace(players, game, random = Math.random) {
   const seats = players.map((player, index) => ({ ...player, seat: players.length === 2 ? index * 2 : index, color: LUDO_COLORS[players.length === 2 ? index * 2 : index] }))
   const current = Math.floor(random() * seats.length)
@@ -77,7 +98,7 @@ export function raceAction(match, action, random = Math.random) {
       const landed = start + die > 100 ? start : start + die
       const destination = landed === start ? start : JUMPS[landed] || landed
       next.positions[owner] = destination
-      next.path = Array.from({ length: landed - start }, (_, index) => start + index + 1)
+      next.path = Array.from({ length: landed - start + 1 }, (_, index) => start + index)
       if (destination !== landed) next.path.push(destination)
       next.moved = owner
       next.log = landed === start ? `${name} needs an exact roll to finish.` : `${name}: ${start} to ${landed}${destination !== landed ? `, ${destination > landed ? 'climbs' : 'slides'} to ${destination}` : ''}.`
@@ -122,3 +143,4 @@ export function raceBot(match) {
   }
   return { type: 'move', piece: moves.sort((left, right) => value(right) - value(left))[0] }
 }
+import { integerIn, isRecord, playerIndex, validPlayers } from './matchValidation.js'

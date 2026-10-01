@@ -3,7 +3,8 @@ import { RotateCcw, RefreshCw, Flag, Handshake } from 'lucide-react'
 import { useSound } from '../hooks/useSound'
 import { useLocalMatch } from '../hooks/useLocalMatch'
 import Modal from '../components/Modal'
-import { chessResult, restoreChess } from './chessRules'
+import PlayerAvatar from '../components/PlayerAvatar'
+import { chessResult, isChessMatch, restoreChess } from './chessRules'
 
 const PIECES = {
   wp: '♙',
@@ -29,7 +30,7 @@ function statusFor(game) {
 
 export default function CoupleChess() {
   const play = useSound()
-  const [match, setMatch] = useLocalMatch('chess', { moves: [], result: null })
+  const [match, setMatch, storageError] = useLocalMatch('chess', { moves: [], result: null }, 1, isChessMatch)
   const [selected, setSelected] = useState(null)
   const [promotion, setPromotion] = useState(null)
   const [dialog, setDialog] = useState(null)
@@ -41,15 +42,20 @@ export default function CoupleChess() {
   const finished = !!match.result || !!chessResult(game)
 
   const commitMove = (move) => {
-    game.move(move)
-    setMatch({ moves: game.history(), result: chessResult(game) })
+    let checkmate = false
+    if (!setMatch((current) => {
+      const nextGame = restoreChess(current.moves)
+      nextGame.move(move)
+      checkmate = nextGame.isCheckmate()
+      return { moves: nextGame.history(), result: chessResult(nextGame) }
+    }, match)) return
     setPromotion(null)
     setSelected(null)
-    play(game.isCheckmate() ? 'win' : 'click')
+    play(checkmate ? 'win' : 'click')
   }
 
   const selectSquare = (square) => {
-    if (finished) return
+    if (finished || promotion || dialog) return
     const piece = game.get(square)
 
     if (!selected) {
@@ -66,14 +72,12 @@ export default function CoupleChess() {
       return
     }
 
-    try {
-      const choices = game.moves({ square: selected, verbose: true }).filter((move) => move.to === square)
-      if (choices.some((move) => move.promotion)) setPromotion({ from: selected, to: square })
-      else commitMove({ from: selected, to: square })
-    } catch {
+    const choices = game.moves({ square: selected, verbose: true }).filter((move) => move.to === square)
+    if (!choices.length) {
       play('error')
       setSelected(null)
-    }
+    } else if (choices.some((move) => move.promotion)) setPromotion({ from: selected, to: square })
+    else commitMove({ from: selected, to: square })
   }
 
   const restart = () => {
@@ -86,6 +90,7 @@ export default function CoupleChess() {
 
   return (
     <div className="text-center">
+      {storageError && <p role="alert" className="mb-4 text-sm text-wine">{storageError}</p>}
       <div className="flex flex-wrap items-center justify-between gap-3 text-left">
         <div>
           <p className="editorial-label">Couple match</p>
@@ -113,14 +118,14 @@ export default function CoupleChess() {
                 onClick={() => selectSquare(square)}
                 className={`relative grid min-w-0 place-items-center text-3xl sm:text-5xl leading-none transition ${
                   dark ? 'bg-[#9a6d63]' : 'bg-[#f1e6db]'
-                } ${wasMoved ? 'after:absolute after:inset-0 after:bg-[#d7b467]/35' : ''} ${isSelected ? 'ring-inset ring-4 ring-wine' : ''}`}
+                } ${wasMoved ? 'after:absolute after:inset-0 after:bg-[#d7b467]/35' : ''} ${isSelected ? 'ring-inset ring-4 ring-[#272126]' : ''}`}
                 aria-label={`${square}${piece ? `, ${piece.color === 'w' ? 'white' : 'black'} ${piece.type}` : ', empty'}`}
                 aria-pressed={isSelected}
               >
-                {isTarget && <span className="absolute h-1/4 w-1/4 rounded-full bg-wine/55" aria-hidden="true" />}
-                {piece && <span className="relative z-10 drop-shadow-sm">{PIECES[`${piece.color}${piece.type}`]}</span>}
-                {fileIndex === 0 && <span className="absolute left-0.5 top-0.5 text-[8px] font-bold text-ink/45 sm:text-[10px]">{rank}</span>}
-                {rank === 1 && <span className="absolute bottom-0 right-0.5 text-[8px] font-bold text-ink/45 sm:text-[10px]">{FILES[fileIndex]}</span>}
+                {isTarget && <span className="absolute h-1/4 w-1/4 rounded-full bg-[#272126] ring-2 ring-[#fffefa]" aria-hidden="true" />}
+                {piece && <span className="relative z-10 drop-shadow-sm" style={{ color: piece.color === 'w' ? '#fffefa' : '#272126', WebkitTextStroke: '1px #272126' }}>{PIECES[`${piece.color}${piece.type}`]}</span>}
+                {index % 8 === 0 && <span className="absolute left-0.5 top-0.5 text-[8px] font-bold sm:text-[10px]" style={{ color: dark ? '#fffefa' : '#493b37' }}>{rank}</span>}
+                {index >= 56 && <span className="absolute bottom-0 right-0.5 text-[8px] font-bold sm:text-[10px]" style={{ color: dark ? '#fffefa' : '#493b37' }}>{FILES[fileIndex]}</span>}
               </button>
             )
           })}
@@ -128,21 +133,21 @@ export default function CoupleChess() {
       </div>
 
       <div className="mt-5 flex justify-center gap-6 text-sm font-bold">
-        <span className="text-wine">♔ Rajesh</span>
-        <span className="text-sage">♚ Neha</span>
+        <span className="flex items-center gap-2 text-ink"><PlayerAvatar player={{ id: 'rajesh', name: 'Rajesh', color: '#8f4058' }} decorative />Rajesh · White</span>
+        <span className="flex items-center gap-2 text-ink"><PlayerAvatar player={{ id: 'neha', name: 'Neha', color: '#71867a' }} decorative />Neha · Black</span>
       </div>
       <p className="mt-3 text-xs text-muted">Select a piece, then choose one of its marked legal squares.</p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         <button className="icon-button" title="Flip board" aria-label="Flip board" onClick={() => setFlipped(!flipped)}><RefreshCw size={18} /></button>
         <button className="btn-ghost" disabled={finished} onClick={() => setDialog('resign')}><Flag size={17} />Resign</button>
         <button className="btn-ghost" disabled={finished || match.moves.length < 2} onClick={() => setDialog('draw')}><Handshake size={17} />Offer draw</button>
-        {!finished && (game.isThreefoldRepetition() || game.isDrawByFiftyMoves()) && <button className="btn" onClick={() => setMatch({ ...match, result: 'Draw claimed' })}>Claim draw</button>}
+        {!finished && (game.isThreefoldRepetition() || game.isDrawByFiftyMoves()) && <button className="btn" onClick={() => setMatch({ ...match, result: 'Draw claimed' }, match)}>Claim draw</button>}
       </div>
       <details className="mt-5 text-left"><summary>Move history</summary><ol className="mt-2 grid grid-cols-2 gap-1 text-sm">{match.moves.map((move, index) => <li key={index}>{Math.floor(index / 2) + 1}{index % 2 ? '...' : '.'} {move}</li>)}</ol></details>
       <Modal open={!!promotion} onClose={() => setPromotion(null)}><h2 className="font-display text-2xl">Promote pawn</h2><div className="mt-5 flex gap-3">{[['q', 'Queen'], ['r', 'Rook'], ['b', 'Bishop'], ['n', 'Knight']].map(([piece, name]) => <button key={piece} className="btn-ghost text-3xl" aria-label={`Promote to ${name}`} title={name} onClick={() => commitMove({ ...promotion, promotion: piece })}>{PIECES[`${game.turn()}${piece}`]}</button>)}</div></Modal>
       <Modal open={!!dialog} onClose={() => setDialog(null)}><h2 className="font-display text-2xl">{dialog === 'restart' ? 'Start a new match?' : dialog === 'resign' ? 'Resign this match?' : 'Does your opponent accept the draw?'}</h2><div className="mt-5 flex gap-3"><button className="btn-ghost" onClick={() => setDialog(null)}>Cancel</button><button className="btn" onClick={() => {
         if (dialog === 'restart') restart()
-        else { setMatch({ ...match, result: dialog === 'draw' ? 'Draw by agreement' : `${game.turn() === 'w' ? 'Neha' : 'Rajesh'} wins by resignation` }); setDialog(null) }
+        else { setMatch({ ...match, result: dialog === 'draw' ? 'Draw by agreement' : `${game.turn() === 'w' ? 'Neha' : 'Rajesh'} wins by resignation` }, match); setDialog(null) }
       }}>Confirm</button></div></Modal>
     </div>
   )
