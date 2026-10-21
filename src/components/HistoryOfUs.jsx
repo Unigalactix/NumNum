@@ -120,7 +120,7 @@ export default function HistoryOfUs({ onClose }) {
                           {daysSince(moment.since)} days {moment.countLabel}
                         </p>
                       )}
-                      {moment.image && (
+                      {(moment.image || moment.images?.length > 0) && (
                         <button
                           type="button"
                           onClick={() => {
@@ -167,11 +167,14 @@ export default function HistoryOfUs({ onClose }) {
             <h2 className="mt-2 pr-12 font-display text-3xl leading-tight text-ink">
               {selectedImage.title}
             </h2>
-            <img
-              src={selectedImage.image}
-              alt={selectedImage.imageAlt || ''}
-              className="mt-5 max-h-[72vh] w-full rounded-lg object-contain"
-            />
+            {(selectedImage.images || [selectedImage]).map((photo) => (
+              <img
+                key={photo.image}
+                src={`${import.meta.env.BASE_URL}${photo.image}`}
+                alt={photo.imageAlt || ''}
+                className="mt-5 max-h-[72vh] w-full rounded-lg object-contain"
+              />
+            ))}
           </div>
         )}
       </Modal>

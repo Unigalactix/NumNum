@@ -17,7 +17,31 @@ const STICKER_PAGE_DEFINITIONS = [
   { key: 'sheet10', source: 'assets/stickers/sheet10.png', count: 8, title: 'Our Seattle Trip', caption: 'rainy-day us ☔' },
 ]
 
-export const stickerPages = STICKER_PAGE_DEFINITIONS.map((page) => ({
+const PHOTO_STICKER_PAGES = [
+  {
+    key: 'photo-memories',
+    title: 'Little Photo Keepsakes',
+    caption: 'our memories, with a little paper border 🤍',
+    photos: [
+      ['caricature', 'Our Seattle caricature'],
+      ['columbia-center-skydeck', 'Together above Seattle'],
+      ['diorama', 'Our little paper world'],
+      ['lake-union-kayaking', 'Moonlight on Lake Union'],
+      ['museum-of-illusions', 'Our Museum of Illusions adventure'],
+    ],
+  },
+  {
+    key: 'photo-lanterns',
+    title: 'A Day to Glow',
+    caption: 'you passed your test, then we made a little light together 🕯️',
+    photos: [
+      ['water-lantern-festival-picnic', 'Our Water Lantern Festival picnic'],
+      ['water-lantern-festival-night', 'You, me, and our glowing lantern'],
+    ],
+  },
+]
+
+export const stickerPages = [...STICKER_PAGE_DEFINITIONS.map((page) => ({
   ...page,
   stickers: Array.from({ length: page.count }, (_, index) => {
     const number = String(index + 1).padStart(2, '0')
@@ -30,9 +54,29 @@ export const stickerPages = STICKER_PAGE_DEFINITIONS.map((page) => ({
       page: page.key,
     }
   }),
-}))
+})), ...PHOTO_STICKER_PAGES.map(({ photos, ...page }) => ({
+  ...page,
+  count: photos.length,
+  stickers: photos.map(([name, label]) => ({
+    id: `photo-${name}`,
+    file: `assets/stickers/individual/photo-${name}.png`,
+    notificationFile: `assets/stickers/notification/photo-${name}.jpg`,
+    label,
+    page: page.key,
+  })),
+}))]
 
 export const stickerCollection = stickerPages.flatMap((page) => page.stickers)
+
+const handwrittenLetter = {
+  date: 'October 21, 2026 · 11:47 AM PDT (added)',
+  title: 'Hi Neha,',
+  body: '',
+  image: 'assets/letters/hi-neha-october-21.png',
+  imageAlt: 'A handwritten love letter to Neha, promising love through her darkest times and a silly, loving, caring person by her side. It ends with “I love you.”',
+  preview: 'a little handwritten love, kept here for you.',
+  signoff: '',
+}
 
 export const content = {
   her: { name: 'Neha', nickname: 'Num Num' },
@@ -368,6 +412,41 @@ export const content = {
       imageAlt: 'Rajesh and Neha together at the Columbia Center Skydeck in Seattle',
       imageLabel: 'View Skydeck photo',
     },
+    {
+      date: 'October 1st, 2026',
+      emoji: '🎬',
+      title: 'Digger with your friends, again',
+      detail: 'Another movie night with your friends.',
+    },
+    {
+      date: 'October 3rd, 2026',
+      emoji: '🍽️',
+      title: 'Dinner at Kanak, then Heart of the Beast',
+      detail: 'Dinner together at Kanak Restaurant, followed by a movie date.',
+    },
+    {
+      date: 'October 5th, 2026',
+      emoji: '😂',
+      title: 'The day your phone stayed in the car',
+      detail: 'You forgot your phone in the driving-school car during practice. 😂😂',
+    },
+    {
+      date: 'October 17th, 2026',
+      emoji: '🕯️',
+      title: 'You passed your driving test, and we lit a lantern',
+      detail: 'You passed your behind-the-wheel test! Then we celebrated at the Water Lantern Festival — a little picnic, a glowing lantern, and us.',
+      images: [
+        {
+          image: 'assets/water-lantern-festival-picnic.jpg',
+          imageAlt: 'Neha and Rajesh having a picnic at the Water Lantern Festival, surrounded by autumn trees.',
+        },
+        {
+          image: 'assets/water-lantern-festival-night.jpg',
+          imageAlt: 'Neha and Rajesh together after dark beside their glowing decorated water lantern.',
+        },
+      ],
+      imageLabel: 'View festival photos',
+    },
   ],
 
   // Short sweet notes revealed after each mini-game
@@ -438,6 +517,7 @@ export const content = {
   // To add a new letter, drop an object at the TOP of this list and set `date`
   // to the moment you wrote it, e.g. 'August 12, 2026 · 10:30 AM'.
   previousLetters: [
+    handwrittenLetter,
     {
       date: 'August 20, 2026 · 11:13 AM',
       title: 'Thank You, My Num Num 💗',
@@ -461,10 +541,8 @@ even when we have our odds, we have a cute way of blending them — a cute way o
   // The Love Letter (finale). Change `version` whenever a new letter is added;
   // this resets progress and creates a fresh set of five required games.
   finale: {
-    version: '2026-08-20T11:13',
-    awaiting: true,
-    title: 'Awaiting a new letter…',
-    body: `there isn’t a new letter waiting here just yet — but this little box will always stay open for you. 💌`,
-    signoff: 'come back soon, my Num Num. 💗',
+    ...handwrittenLetter,
+    version: '2026-10-21T11:47-07:00',
+    awaiting: false,
   },
 }

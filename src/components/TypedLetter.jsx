@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
-// A glass letter card that "writes" its body out character-by-character.
+// A paper letter card that "writes" its body out character-by-character.
 // Every featured, archived, and future letter is rendered through this component.
 // Reduced-motion users get the full text instantly.
 export default function TypedLetter({ letter, footer, start = true }) {
@@ -11,6 +11,10 @@ export default function TypedLetter({ letter, footer, start = true }) {
 
   useEffect(() => {
     if (!start) return
+    if (!body) {
+      setTyped('')
+      return
+    }
     if (reduce) {
       setTyped(body)
       return
@@ -39,15 +43,31 @@ export default function TypedLetter({ letter, footer, start = true }) {
           {date}
         </p>
       )}
-      <div className="mt-8 whitespace-pre-line font-display text-xl leading-[1.75] text-ink sm:text-[1.35rem]">
+      {letter.image && start && (
+        <a
+          href={`${import.meta.env.BASE_URL}${letter.image}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 block rounded-lg"
+          aria-label="View original handwritten letter (opens in a new tab)"
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}${letter.image}`}
+            alt={letter.imageAlt}
+            className="h-auto w-full rounded-lg"
+          />
+          <span className="mt-3 block text-sm font-semibold text-wine">View original handwritten letter</span>
+        </a>
+      )}
+      {body && <div className="mt-8 whitespace-pre-line font-display text-xl leading-[1.75] text-ink sm:text-[1.35rem]">
         {typed}
         {!reduce && typed.length < body.length && (
           <span aria-hidden className="ml-0.5 inline-block">
             ▍
           </span>
         )}
-      </div>
-      <p className="mt-10 font-script text-2xl text-wine">{signoff}</p>
+      </div>}
+      {signoff && <p className="mt-10 font-script text-2xl text-wine">{signoff}</p>}
       {footer && <p className="mt-3 border-t border-[#e8e0dc] pt-4 text-right text-xs font-semibold text-muted">{footer}</p>}
     </motion.div>
   )

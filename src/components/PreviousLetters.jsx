@@ -64,7 +64,7 @@ export default function PreviousLetters({ onClose }) {
                   )}
                   <h2 className="mt-2 font-display text-2xl leading-tight text-ink">{letter.title}</h2>
                   <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted">
-                    {letter.body.split('\n')[0]}
+                    {letter.preview || letter.body.split('\n')[0]}
                   </p>
                   <span className="absolute bottom-5 right-5 text-wine transition-transform group-hover:translate-x-1">
                     <ArrowRight size={18} aria-hidden="true" />
