@@ -447,6 +447,36 @@ export const content = {
       ],
       imageLabel: 'View festival photos',
     },
+    {
+      date: 'October 24th, 2026',
+      emoji: '🌊',
+      title: 'Snoqualmie Falls, Twin Falls — and your first drive',
+      detail: 'Your first time driving after passing your test! We rented a Hertz car — a Buick Encore — drove to Snoqualmie Falls, then took the trail to Twin Falls. And then… you scratched the bumper of Carlos’s car with it — your first accident 😂😂 And your first interaction with a police officer, I guess 😁.',
+      images: [
+        {
+          image: 'assets/snoqualmie-falls.jpg',
+          imageAlt: 'Snoqualmie Falls pouring down into the river below, surrounded by autumn trees.',
+        },
+        {
+          image: 'assets/snoqualmie-falls-selfie.jpg',
+          imageAlt: 'Neha and Rajesh smiling together at the falls, with the river rushing behind them.',
+        },
+        {
+          image: 'assets/snoqualmie-falls-rental-car.jpg',
+          imageAlt: 'Our white Hertz Buick Encore rental parked beside Carlos’s gray Honda in the parking lot.',
+        },
+      ],
+      imageLabel: 'View falls photos',
+    },
+    {
+      date: 'October 25th, 2026',
+      emoji: '🍂',
+      title: 'Lunch at Jewel of India and a fall walk around UW',
+      detail: 'We had lunch at Jewel of India, then roamed around UW and clicked some photos with the fall colors.',
+      image: 'assets/uw-fall-colors.jpg',
+      imageAlt: 'Rajesh and Neha taking a wide-angle selfie at UW, surrounded by red, orange, and gold fall leaves.',
+      imageLabel: 'View UW photo',
+    },
   ],
 
   // Short sweet notes revealed after each mini-game
