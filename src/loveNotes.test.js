@@ -4,7 +4,7 @@ import { loveNoteForSlot, noteCollections, NOTE_PERIODS, validateNoteCollections
 
 test('every authored note is unique, expressive, and within the push budget', () => {
   validateNoteCollections()
-  assert.equal(Object.values(noteCollections).flat().length, 104)
+  assert.equal(Object.values(noteCollections).flat().length, 107)
 })
 
 test('a year of sends avoids repeating themes within three sends and bodies within 80 sends', () => {
