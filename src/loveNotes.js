@@ -65,6 +65,7 @@ const NOTE_BODIES = {
     'Loving you has made everyday life feel worth paying closer attention to. ☀️💗',
     'You are allowed to be proud of yourself. I certainly am proud of you. 🌷🫶',
     'Whatever the next chapter looks like, I am glad we get to write it together. 📖💞',
+    'I love you papa... chala chala chala love you... ❤️ 😘',
   ],
   tinglish: [
     'NUVVU ADRUSTAVANTHURALIVI PAPA 😌💗',
@@ -87,6 +88,8 @@ const NOTE_BODIES = {
     'Nee day ela unna sare, naa daggara oka hug ready ga untundi. 🤗💞',
     'Eyyy papa, pandhi la aruvu okasari, hihi... i love you. 🐷😂💗',
     'PAPAAAAAAAAAAAAAAAA, oka smile ivvu. Adhe naa favorite gift. 😘💗',
+    'Nuvvu Dorakadam na Adrustam papa, Manaspoorthiga chepthunna. Em balavantham ledhu 😁😁.',
+    'Nuvve andharikantey chala chala manchidhanivi papa, nee tharvathey evaranna. Manaspoorthiga chepthunna, no force 😁😁.',
   ],
   goldie: [
     'Goldie here! I fetched this notification. It smells suspiciously like Rajesh missing you. 🐕💌',
