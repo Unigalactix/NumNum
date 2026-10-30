@@ -1,6 +1,12 @@
-import { useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowLeft, CalendarHeart, Image as ImageIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import {
+  ArrowLeft,
+  CalendarHeart,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+} from 'lucide-react'
 import { content } from '../content'
 import { useSound } from '../hooks/useSound'
 import { gentle, pageTransition, tap } from '../lib/motion'
@@ -22,6 +28,18 @@ export default function HistoryOfUs({ onClose }) {
   const moments = content.history || []
   const favorites = content.favorites || []
   const [selectedImage, setSelectedImage] = useState(null)
+  const [photoIndex, setPhotoIndex] = useState(0)
+  const photoCount = selectedImage
+    ? (selectedImage.images || [selectedImage]).length
+    : 0
+
+  useEffect(() => {
+    if (!selectedImage || photoCount <= 1 || reduceMotion) return undefined
+    const timer = setInterval(() => {
+      setPhotoIndex((index) => (index + 1) % photoCount)
+    }, 3500)
+    return () => clearInterval(timer)
+  }, [selectedImage, photoCount, photoIndex, reduceMotion])
 
   return (
     <div className="mx-auto max-w-5xl overflow-x-hidden px-5 pb-24 pt-10 sm:px-6 sm:pt-14">
@@ -125,6 +143,7 @@ export default function HistoryOfUs({ onClose }) {
                           type="button"
                           onClick={() => {
                             play('click')
+                            setPhotoIndex(0)
                             setSelectedImage(moment)
                           }}
                           className="btn-ghost mt-4 text-sm"
@@ -167,14 +186,91 @@ export default function HistoryOfUs({ onClose }) {
             <h2 className="mt-2 pr-12 font-display text-3xl leading-tight text-ink">
               {selectedImage.title}
             </h2>
-            {(selectedImage.images || [selectedImage]).map((photo) => (
-              <img
-                key={photo.image}
-                src={`${import.meta.env.BASE_URL}${photo.image}`}
-                alt={photo.imageAlt || ''}
-                className="mt-5 max-h-[72vh] w-full rounded-lg object-contain"
-              />
-            ))}
+            {(() => {
+              const photos = selectedImage.images || [selectedImage]
+              if (photos.length <= 1) {
+                const [photo] = photos
+                return (
+                  <img
+                    key={photo.image}
+                    src={`${import.meta.env.BASE_URL}${photo.image}`}
+                    alt={photo.imageAlt || ''}
+                    className="mt-5 max-h-[72vh] w-full rounded-lg object-contain"
+                  />
+                )
+              }
+              const activeIndex = Math.min(photoIndex, photos.length - 1)
+              const photo = photos[activeIndex]
+              const goTo = (index) => {
+                play('click')
+                setPhotoIndex(
+                  ((index % photos.length) + photos.length) % photos.length,
+                )
+              }
+              return (
+                <div>
+                  <div className="relative mt-5 overflow-hidden rounded-lg">
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.img
+                        key={photo.image}
+                        src={`${import.meta.env.BASE_URL}${photo.image}`}
+                        alt={photo.imageAlt || ''}
+                        initial={
+                          reduceMotion
+                            ? { opacity: 0 }
+                            : { opacity: 0, x: 48 }
+                        }
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={
+                          reduceMotion
+                            ? { opacity: 0 }
+                            : { opacity: 0, x: -48 }
+                        }
+                        transition={{
+                          duration: reduceMotion ? 0.15 : 0.35,
+                          ease: 'easeOut',
+                        }}
+                        className="max-h-[62vh] w-full rounded-lg object-contain"
+                      />
+                    </AnimatePresence>
+                    <button
+                      type="button"
+                      onClick={() => goTo(activeIndex - 1)}
+                      aria-label="Previous photo"
+                      className="icon-button absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 shadow-soft"
+                    >
+                      <ChevronLeft size={19} aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => goTo(activeIndex + 1)}
+                      aria-label="Next photo"
+                      className="icon-button absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 shadow-soft"
+                    >
+                      <ChevronRight size={19} aria-hidden="true" />
+                    </button>
+                    <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-xs font-semibold text-white">
+                      {activeIndex + 1} / {photos.length}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex justify-center gap-2">
+                    {photos.map((dotPhoto, index) => (
+                      <button
+                        key={dotPhoto.image}
+                        type="button"
+                        onClick={() => goTo(index)}
+                        aria-label={`Show photo ${index + 1}`}
+                        className={`h-2.5 rounded-full transition-all ${
+                          index === activeIndex
+                            ? 'w-6 bg-wine'
+                            : 'w-2.5 bg-wine/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )}
       </Modal>
