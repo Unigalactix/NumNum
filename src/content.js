@@ -477,6 +477,39 @@ export const content = {
       imageAlt: 'Rajesh and Neha taking a wide-angle selfie at UW, surrounded by red, orange, and gold fall leaves.',
       imageLabel: 'View UW photo',
     },
+    {
+      date: 'October 30th, 2026',
+      emoji: '🎬',
+      title: 'Adarsha Kutumbham 47 at the movies',
+      detail: 'We went to watch Adarsha Kutumbham 47 — a movie date, just us and the big screen.',
+    },
+    {
+      date: 'October 31st, 2026',
+      emoji: '🎃',
+      title: 'Jewel of India buffet and a Halloween wig',
+      detail: 'Buffet at Jewel of India, then Halloween fun — you tried on a bright orange wig at the hat shop and looked adorable. 🧡',
+      image: 'assets/halloween-orange-wig.jpg',
+      imageAlt: 'Neha trying on a bright orange Halloween wig at a hat shop, taking a mirror selfie with Rajesh smiling behind her.',
+      imageLabel: 'View Halloween photo',
+    },
+    {
+      date: 'November 4th, 2026',
+      emoji: '🏹',
+      title: 'Ramayana in 3D, in 4DX',
+      detail: 'We watched Ramayana in 3D at a 4DX theater — moving seats and all, the epic felt larger than life.',
+    },
+    {
+      date: 'November 12th, 2026',
+      emoji: '💻',
+      title: 'The day Outlook went down',
+      detail: 'A huge Microsoft 365 outage took Outlook down for hours — work paused, and we just watched the internet melt down together.',
+    },
+    {
+      date: 'November 15th, 2026',
+      emoji: '🛍️',
+      title: 'Scene, then shopping',
+      detail: 'We went to watch Scene, then went shopping after — a slow, happy day out together.',
+    },
   ],
 
   // Short sweet notes revealed after each mini-game
