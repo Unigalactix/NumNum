@@ -512,6 +512,23 @@ export const content = {
     },
   ],
 
+  // Places we've been — x/y are pin positions (percent) on the illustrated
+  // story map; `date` links each place to its History of Us moment.
+  places: [
+    { name: 'Bainbridge Island', area: 'Across the Sound', x: 7, y: 38, date: 'August 15th, 2026' },
+    { name: 'Amazon Spheres & Banana Stand', area: 'Downtown Seattle', x: 30, y: 47, date: 'August 7th, 2026' },
+    { name: 'Beneath the Streets', area: 'Pioneer Square, Seattle', x: 27, y: 56, date: 'September 19th, 2026' },
+    { name: 'Columbia Center Skydeck', area: 'Downtown Seattle', x: 33, y: 53, date: 'September 26th, 2026' },
+    { name: 'Museum of Illusions', area: 'Seattle', x: 36, y: 43, date: 'September 17th, 2026' },
+    { name: 'Lake Union', area: 'Seattle', x: 31, y: 33, date: 'September 18th, 2026' },
+    { name: 'University of Washington', area: 'U District, Seattle', x: 41, y: 25, date: 'October 25th, 2026' },
+    { name: 'Jewel of India', area: 'Near UW, Seattle', x: 45, y: 29, date: 'October 31st, 2026' },
+    { name: 'Redmond Sai Baba Temple', area: 'Redmond', x: 63, y: 28, date: 'September 3rd, 2026' },
+    { name: 'Snoqualmie Falls', area: 'Snoqualmie', x: 87, y: 42, date: 'October 24th, 2026' },
+    { name: 'Twin Falls', area: 'North Bend', x: 91, y: 54, date: 'October 24th, 2026' },
+    { name: 'USC', area: 'Los Angeles — far away', x: 50, y: 93, date: 'May 15th, 2026', far: true },
+  ],
+
   // Short sweet notes revealed after each mini-game
   notes: {
     memory: {
