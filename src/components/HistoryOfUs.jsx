@@ -11,6 +11,8 @@ import { content } from '../content'
 import { useSound } from '../hooks/useSound'
 import { gentle, pageTransition, tap } from '../lib/motion'
 import Modal from './Modal'
+import OnThisDay from './OnThisDay'
+import StoryMap from './StoryMap'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -22,11 +24,27 @@ function daysSince(isoDate) {
   return Math.max(0, Math.floor((todayUtc - eventUtc) / DAY_MS))
 }
 
+function momentAnchor(date) {
+  return `moment-${date.replace(/[^a-z0-9]+/gi, '-')}`
+}
+
 export default function HistoryOfUs({ onClose }) {
   const play = useSound()
   const reduceMotion = useReducedMotion()
   const moments = content.history || []
   const favorites = content.favorites || []
+  const places = content.places || []
+  const storyStart =
+    moments.find((moment) => moment.countLabel === 'since we matched')?.since ||
+    '2026-04-03'
+  const daysTogether = daysSince(storyStart)
+
+  const jumpToMoment = (date) => {
+    play('click')
+    document
+      .getElementById(momentAnchor(date))
+      ?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
+  }
   const [selectedImage, setSelectedImage] = useState(null)
   const [photoIndex, setPhotoIndex] = useState(0)
   const photoCount = selectedImage
@@ -67,6 +85,34 @@ export default function HistoryOfUs({ onClose }) {
         </p>
       </motion.header>
 
+      <motion.section
+        initial={reduceMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
+        whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        viewport={{ once: true, amount: 0.5 }}
+        transition={reduceMotion ? { duration: 0 } : gentle}
+        className="mt-10 border-y border-[#e4dde0] py-6"
+        aria-label="Our story in numbers"
+      >
+        <div className="flex flex-wrap items-end gap-x-12 gap-y-5">
+          <div>
+            <p className="font-display text-5xl leading-none text-wine sm:text-6xl">
+              {daysTogether}
+            </p>
+            <p className="editorial-label mt-2">Days of us — since we matched</p>
+          </div>
+          <div>
+            <p className="font-display text-3xl leading-none text-ink">{moments.length}</p>
+            <p className="editorial-label mt-2">Moments kept</p>
+          </div>
+          <div>
+            <p className="font-display text-3xl leading-none text-ink">{places.length}</p>
+            <p className="editorial-label mt-2">Places we’ve been</p>
+          </div>
+        </div>
+      </motion.section>
+
+      <OnThisDay moments={moments} onJump={jumpToMoment} />
+
       {favorites.length > 0 && (
         <motion.section
           initial={reduceMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
@@ -93,6 +139,8 @@ export default function HistoryOfUs({ onClose }) {
         </motion.section>
       )}
 
+      <StoryMap places={places} moments={moments} onJump={jumpToMoment} />
+
       <div className="relative mx-auto mt-14 max-w-4xl">
         <div className="absolute bottom-5 left-[1.15rem] top-5 w-px bg-[#d8ced2] sm:left-1/2 sm:-translate-x-1/2" />
 
@@ -102,6 +150,7 @@ export default function HistoryOfUs({ onClose }) {
             return (
               <motion.article
                 key={`${moment.date}-${moment.title}`}
+                id={momentAnchor(moment.date)}
                 initial={
                   reduceMotion
                     ? false
