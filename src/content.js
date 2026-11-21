@@ -510,6 +510,12 @@ export const content = {
       title: 'Scene, then shopping',
       detail: 'We went to watch Scene, then went shopping after — a slow, happy day out together.',
     },
+    {
+      date: 'November 21st, 2026',
+      emoji: '🛴',
+      title: 'The day you fell off a Lime scooter',
+      detail: 'You took a Lime scooter to get mochi from the Saturday Market and took a fall and got hurt. My brave girl — heal fast, papa. The mochi can wait. ❤️‍🩹',
+    },
   ],
 
   // Places we've been — x/y are pin positions (percent) on the illustrated
