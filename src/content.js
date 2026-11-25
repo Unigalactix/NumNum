@@ -516,6 +516,12 @@ export const content = {
       title: 'The day you fell off a Lime scooter',
       detail: 'You took a Lime scooter to get mochi from the Saturday Market and took a fall and got hurt. My brave girl — heal fast, papa. The mochi can wait. ❤️‍🩹',
     },
+    {
+      date: 'November 24th, 2026',
+      emoji: '✈️',
+      title: 'The day you flew to Japan',
+      detail: 'You flew out of Sea-Tac to Tokyo — ANA flight 117, a Boeing 787-9, wheels up at 3:40 PM from gate S8, landing at Haneda on November 25th at 7:15 PM. Counting the days till you’re back, papa. 🇯🇵',
+    },
   ],
 
   // Places we've been — x/y are pin positions (percent) on the illustrated
@@ -533,6 +539,7 @@ export const content = {
     { name: 'Snoqualmie Falls', area: 'Snoqualmie', x: 87, y: 42, date: 'October 24th, 2026' },
     { name: 'Twin Falls', area: 'North Bend', x: 91, y: 54, date: 'October 24th, 2026' },
     { name: 'USC', area: 'Los Angeles — far away', x: 50, y: 93, date: 'May 15th, 2026', far: true },
+    { name: 'Tokyo Haneda', area: 'Tokyo, Japan — far away', x: 72, y: 93, date: 'November 24th, 2026', far: true },
   ],
 
   // Short sweet notes revealed after each mini-game
